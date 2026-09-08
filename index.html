@@ -230,7 +230,7 @@ input[type=text],input[type=number],textarea,select{padding:11px 12px;font-size:
 
       <div class="fl">精神活力</div>
       <div class="chips" data-f="energy" data-single="1">
-        <div class="chip ok">非常活跃</div><div class="chip sel">正常</div><div class="chip warn">略蔫</div><div class="chip danger">明显疲惫</div>
+        <div class="chip sel ok">非常活跃</div><div class="chip ok">正常</div><div class="chip warn">略蔫</div><div class="chip danger">明显疲惫</div>
       </div>
       <input type="text" id="note_energy" class="dim-note" placeholder="补充说明（选填），如：上午特别兴奋，下午有点犯困">
 
@@ -242,13 +242,13 @@ input[type=text],input[type=number],textarea,select{padding:11px 12px;font-size:
 
       <div class="fl">早餐</div>
       <div class="chips" data-f="breakfast" data-single="1">
-        <div class="chip ok">全部吃完</div><div class="chip sel">吃了大半</div><div class="chip">吃了一半</div><div class="chip warn">少量</div><div class="chip danger">未进食</div>
+        <div class="chip sel ok">全部吃完</div><div class="chip ok">吃了大半</div><div class="chip">吃了一半</div><div class="chip warn">少量</div><div class="chip danger">未进食</div>
       </div>
       <input type="text" id="note_breakfast" class="dim-note" placeholder="补充说明（选填），如：今天有牛奶，喝完了">
 
       <div class="fl">午餐</div>
       <div class="chips" data-f="lunch" data-single="1">
-        <div class="chip ok">全部吃完</div><div class="chip sel">吃了大半</div><div class="chip">吃了一半</div><div class="chip warn">少量</div><div class="chip danger">未进食</div>
+        <div class="chip sel ok">全部吃完</div><div class="chip ok">吃了大半</div><div class="chip">吃了一半</div><div class="chip warn">少量</div><div class="chip danger">未进食</div>
       </div>
       <input type="text" id="note_lunch" class="dim-note" placeholder="补充说明（选填），如：今天的红烧肉很喜欢，主动添了一次">
 
@@ -295,11 +295,13 @@ input[type=text],input[type=number],textarea,select{padding:11px 12px;font-size:
         <textarea id="injuryText" placeholder="例：13:50 户外滑滑梯，右膝盖擦伤一小块，已消毒贴创可贴，14:05 电话通知妈妈"></textarea>
       </div>
 
-      <div class="fl">体温（℃，留空=未测）<span class="req">● 红线</span></div>
-      <div class="row2">
-        <div style="flex:0 0 140px"><input type="text" id="temp" placeholder="如 36.5"></div>
-        <div><input type="text" id="symptom" placeholder="不适症状，如：咳嗽、流涕（留空=无）"></div>
+      <div class="fl">体温 <span class="req">● 红线</span> <span class="hint" style="font-weight:400">默认正常，异常时才需填数字</span></div>
+      <div class="chips" data-f="tempStatus" data-single="1">
+        <div class="chip sel ok">正常</div><div class="chip danger">异常</div>
       </div>
+      <input type="text" id="temp" style="display:none;max-width:170px;margin-top:8px" placeholder="实际体温 ℃，如 37.8">
+      <div class="fl">不适症状（留空=无）</div>
+      <input type="text" id="symptom" placeholder="如：咳嗽、流涕（体温正常但有咳嗽也可填）">
 
       <div class="fl">参与活动（可多选）</div>
       <div class="chips" data-f="activity">
@@ -325,6 +327,16 @@ input[type=text],input[type=number],textarea,select{padding:11px 12px;font-size:
         <button class="btn" onclick="clearForm()">清空本条</button>
         <span class="hint" style="align-self:center">保存后可在「日报」页生成文案</span>
       </div>
+    </div>
+
+    <div class="card">
+      <h3>✍️ 落款设置 <span class="tag b-blue">日报 / 周报自动沿用</span></h3>
+      <div class="hint" style="margin-bottom:8px">日报和周报结尾会带上这个署名，比如「—— 王老师」「—— 小二班 李老师」。在这里填一次，之后自动沿用，不用每天重填。</div>
+      <div class="row2">
+        <div><input type="text" id="signInput" placeholder="如：王老师"></div>
+        <div style="flex:0 0 110px"><button class="btn btn-p" onclick="saveSign()">保存</button></div>
+      </div>
+      <div class="hint" style="margin-top:8px">当前日报/周报结尾显示为：<b id="signPreview">—— 老师</b></div>
     </div>
   </div>
 
@@ -480,23 +492,36 @@ input[type=text],input[type=number],textarea,select{padding:11px 12px;font-size:
   <!-- 文案库 -->
   <div class="page" id="pPhrases">
     <div class="card">
-      <h3>📥 粘贴导入 <span class="tag b-purple">把你日常写的话术贴进来</span></h3>
+      <h3>📥 粘贴导入 <span class="tag b-purple">整段粘贴，自动识别归类</span></h3>
       <div class="warnbox wb-blue">
-        把你自己写过的话术<b>整段复制粘贴</b>到下面，选一个归属类别，点「导入」。一行一条，工具会自动去重。<br>
-        例：你平时写日报总说「今天吃饭可香了，还把汤喝完了」——把它贴进来归到「进食/全部吃完」，以后系统就会用你自己的说法。
+        把你写过的话术<b>整段复制粘贴</b>到下面（一行一条），点「🔍 识别」——工具会<b>自动判断每句属于哪个维度和状态</b>，不用你手动选。<br>
+        例：贴「今天吃饭可香了，还把汤喝完了」→ 自动归到「进食 / 全部吃完」；贴「早上分离时哭了5分钟」→ 自动归到「情绪 / 哭闹」。<br>
+        识别结果会先给你<b>预览确认</b>，你可以逐条改归类后再导入，避免误判污染文案库。
       </div>
+      <div class="fl">粘贴你的话术（每行一条）</div>
+      <textarea id="piText" style="min-height:120px" placeholder="今天吃饭可香了，还把汤喝完了&#10;早上分离时哭了5分钟，抱一会儿就好&#10;午睡翻来覆去了一会儿才睡&#10;大便有点偏干，建议多喝水"></textarea>
+      <div class="copy-row">
+        <button class="btn btn-p" onclick="autoDetect()">🔍 识别归类</button>
+        <button class="btn" onclick="clearPiText()">清空</button>
+      </div>
+      <div class="hint" style="margin-top:6px" id="piStatus"></div>
+      <div id="piPreview"></div>
+    </div>
+    <div class="card">
+      <h3>✍️ 手动指定归类 <span class="tag b-blue">自动识别不准时用</span></h3>
+      <div class="hint" style="margin-bottom:8px">如果某句话工具识别不准，或者你想自己指定归类，在这里选维度后粘贴导入。</div>
       <div class="fl">归入哪个类别</div>
       <div class="row2">
         <div><select id="piField"></select></div>
         <div><select id="piValue"></select></div>
       </div>
-      <div class="fl">粘贴你的话术（每行一条）</div>
-      <textarea id="piText" style="min-height:120px" placeholder="今天吃饭可香了，还把汤喝完了&#10;胃口特别好，吃得又快又干净&#10;光盘啦，还主动把碗递给我"></textarea>
+      <div class="fl">粘贴话术（每行一条）</div>
+      <textarea id="piText2" style="min-height:80px" placeholder="今天吃饭可香了，还把汤喝完了"></textarea>
       <div class="copy-row">
         <button class="btn btn-p" onclick="pasteImport()">📥 导入</button>
-        <button class="btn" onclick="document.getElementById('piText').value=''">清空</button>
+        <button class="btn" onclick="document.getElementById('piText2').value=''">清空</button>
       </div>
-      <div class="hint" style="margin-top:6px" id="piStatus"></div>
+      <div class="hint" style="margin-top:6px" id="piStatus2"></div>
     </div>
     <div class="card">
       <h3>🎨 文案措辞库 <span class="tag b-purple">可自定义 · 可导入导出 · 可联网更新</span></h3>
@@ -647,6 +672,13 @@ function displayName(k){
 }
 let curKid=null,repKid=null,greetIdx=0;
 const NOTE_FIELDS=['attendance','energy','mood','breakfast','lunch','pick','snack','stoolCount','stoolStatus','nap','activity','social'];
+// 默认值：正常状态预填，异常才需点选（避免每个孩子都从头点一遍）
+const DEFAULT_SINGLE={attendance:'正常出勤',energy:'非常活跃',mood:'平静',breakfast:'全部吃完',lunch:'全部吃完',snack:'正常',stoolCount:'1次',stoolStatus:'正常',nap:'正常入睡',injury:'无',tempStatus:'正常',social:'被动跟随'};
+const DEFAULT_MULTI={pick:['无'],activity:['自由游戏']};
+// 配色词表：绿=正常/好，黄=需留意，红=异常/红线
+const OK_WORDS=['非常活跃','愉快','全部吃完','1次','正常','主动合作','正常入睡','无','吃了大半','正常出勤','平静','被动跟随','自由游戏'];
+const WARN_WORDS=['略蔫','易烦躁','吃了一半','少量','偏干硬','偏稀','入睡困难','中途醒来','未午睡','低落','迟到','请假','早退','未吃'];
+const DANGER_WORDS=['明显疲惫','哭闹','未进食','异常','有冲突','有','3次+','病假'];
 
 const GREETS=['{p}好～','{p}您好，今天的情况给您同步一下：','{p}好呀，来看看{n}今天在园里的一天：','{p}好，今日小播报来啦：','{p}好，今天想跟您聊聊{n}在园的表现：','{p}好～今天是 {d}，{n}的在园记录：','{p}好，{n}今天的一天给您汇报一下：','{p}您好呀，今天{n}的情况是这样的：','{p}好～跟您说说{n}今天在园里的事：','{p}好，今日份的小分享来啦：','{p}好呀，{n}今天的小故事给您讲讲：','{p}您好，今天的在园情况同步给您：','{p}好～今天是 {d}，来聊聊{n}：','{p}好，今天{n}过得还不错，跟您说说：','{p}您好呀，今日小记录送上：','{p}好，今天想跟您分享{n}的几个瞬间：'];
 const PH={
@@ -716,10 +748,25 @@ function getPhrases(field){
  return out;
 }
 function pickPh(field,value,idx){return pick(getPhrases(field)[value],idx);}
-const RED_CHECK=(r)=>r.injury==='有'||(r.temp&&parseFloat(r.temp)>=37.3)||(r.symptom&&r.symptom.trim())||r.stoolStatus==='异常'||r.stoolStatus==='偏稀'||r.lunch==='未进食'||r.social==='有冲突'||r.mood==='哭闹'||r.attendance==='病假';
+const RED_CHECK=(r)=>r.injury==='有'||r.tempStatus==='异常'||(r.temp&&parseFloat(r.temp)>=37.3)||(r.symptom&&r.symptom.trim())||r.stoolStatus==='异常'||r.stoolStatus==='偏稀'||r.lunch==='未进食'||r.social==='有冲突'||r.mood==='哭闹'||r.attendance==='病假';
 const YEL_CHECK=(r)=>r.energy==='略蔫'||r.energy==='明显疲惫'||r.breakfast==='少量'||r.lunch==='少量'||r.stoolStatus==='偏干硬'||r.nap==='未午睡'||r.nap==='入睡困难'||r.attendance==='迟到';
 
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._tt);t._tt=setTimeout(()=>t.classList.remove('show'),1800);}
+// 落款：日报/周报结尾署名，可自行编辑，自动保存并沿用
+function getSign(){return (DB.sign&&String(DB.sign).trim())||'老师';}
+function setSign(v){DB.sign=v;save();toast('落款已保存，日报/周报都会用它');}
+function saveSign(){
+ const el=document.getElementById('signInput');if(!el)return;
+ const v=(el.value||'').trim();
+ if(!v){toast('落款不能为空，如需恢复默认请填「老师」');return;}
+ setSign(v);renderSign();
+}
+function renderSign(){
+ const el=document.getElementById('signInput');
+ if(el)el.value=getSign();
+ const pv=document.getElementById('signPreview');
+ if(pv)pv.textContent='—— '+getSign();
+}
 function copyText(s,msg){
  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(()=>toast(msg||'已复制')).catch(()=>fallbackCopy(s,msg));}
  else fallbackCopy(s,msg);
@@ -727,7 +774,7 @@ function copyText(s,msg){
 function fallbackCopy(s,msg){const ta=document.createElement('textarea');ta.value=s;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast(msg||'已复制');}catch(e){toast('复制失败，请手动选择复制');}document.body.removeChild(ta);}
 
 function go(id,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));document.getElementById(id).classList.add('on');document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('on'));el.classList.add('on');
- if(id==='pInput')renderPickKid();if(id==='pReport')renderRepPick();if(id==='pBatch')renderBatch();if(id==='pRoster')renderRoster();if(id==='pWeekly')renderWeekly();if(id==='pNotice'){renderNoticeFields();renderNoticeList();renderMyTplList();}if(id==='pPhrases'){renderPasteSelectors();renderPhrasePage();}}
+ if(id==='pInput'){renderPickKid();renderSign();}if(id==='pReport')renderRepPick();if(id==='pBatch')renderBatch();if(id==='pRoster')renderRoster();if(id==='pWeekly')renderWeekly();if(id==='pNotice'){renderNoticeFields();renderNoticeList();renderMyTplList();}if(id==='pPhrases'){renderPasteSelectors();renderPhrasePage();}}
 
 /* ===== 名单 ===== */
 function renderRoster(){
@@ -1051,11 +1098,19 @@ function openForm(k){
  document.getElementById('curParent').textContent=k.parent;
  const rec=DB.records[key(k.id)]||{};
  document.querySelectorAll('#inputForm .chips').forEach(g=>{
-  const f=g.dataset.f;g.querySelectorAll('.chip').forEach(c=>{
+  const f=g.dataset.f;const single=g.dataset.single==='1';
+  g.querySelectorAll('.chip').forEach(c=>{
    c.classList.remove('sel','ok','warn','danger');
-   const v=rec[f];
-   if(Array.isArray(v)){if(v.includes(c.textContent.trim()))c.classList.add('sel');}
-   else if(v===c.textContent.trim())c.classList.add('sel');
+   const t=c.textContent.trim();const v=rec[f];
+   let on=false;
+   if(Array.isArray(v))on=v.includes(t);
+   else if(v===t)on=true;
+   // 关键：没记录的字段套用默认值，避免每个孩子都要从头点一遍
+   if(!v){if(single&&DEFAULT_SINGLE[f]===t)on=true;if(!single&&DEFAULT_MULTI[f]&&DEFAULT_MULTI[f].includes(t))on=true;}
+   if(on){c.classList.add('sel');
+    if(OK_WORDS.includes(t))c.classList.add('ok');
+    if(WARN_WORDS.includes(t))c.classList.add('warn');
+    if(DANGER_WORDS.includes(t))c.classList.add('danger');}
   });
  });
  document.getElementById('napStart').value=rec.napStart||'';
@@ -1063,6 +1118,15 @@ function openForm(k){
  document.getElementById('injuryText').value=rec.injuryText||'';
  document.getElementById('temp').value=rec.temp||'';
  document.getElementById('symptom').value=rec.symptom||'';
+ // 体温状态：优先用记录里的 tempStatus，其次按有无数字判断，都没有则默认正常
+ const tempAbn=(rec.tempStatus?rec.tempStatus==='异常':!!(rec.temp&&rec.temp.trim()));
+ document.querySelectorAll('#inputForm .chips[data-f="tempStatus"] .chip').forEach(c=>{
+  c.classList.remove('sel','ok','danger');
+  if((tempAbn&&c.textContent.trim()==='异常')||(!tempAbn&&c.textContent.trim()==='正常')){
+   c.classList.add('sel');c.classList.add(tempAbn?'danger':'ok');
+  }
+ });
+ document.getElementById('temp').style.display=tempAbn?'block':'none';
  document.getElementById('highlight').value=rec.highlight||'';
  document.getElementById('attention').value=rec.attention||'';
  NOTE_FIELDS.forEach(f=>{const el=document.getElementById('note_'+f);if(el)el.value=(rec['note_'+f])||'';});
@@ -1076,10 +1140,15 @@ document.querySelectorAll('#inputForm .chips').forEach(g=>{
    if(single){g.querySelectorAll('.chip').forEach(x=>x.classList.remove('sel','ok','warn','danger'));c.classList.add('sel');}
    else{c.classList.toggle('sel');}
    if(single){const t=c.textContent.trim();
-    if(['非常活跃','愉快','全部吃完','1次','正常','主动合作','正常入睡','无','吃了大半'].includes(t))c.classList.add('ok');
-    if(['略蔫','易烦躁','吃了一半','少量','偏干硬','偏稀','入睡困难','中途醒来','未午睡','低落','迟到'].includes(t))c.classList.add('warn');
-    if(['明显疲惫','哭闹','未进食','异常','有冲突','有','3次+'].includes(t))c.classList.add('danger');}
+    if(OK_WORDS.includes(t))c.classList.add('ok');
+    if(WARN_WORDS.includes(t))c.classList.add('warn');
+    if(DANGER_WORDS.includes(t))c.classList.add('danger');}
    if(g.dataset.f==='injury')document.getElementById('injuryBox').style.display=(c.textContent.trim()==='有')?'block':'none';
+   if(g.dataset.f==='tempStatus'){
+    const isAbn=c.textContent.trim()==='异常';
+    document.getElementById('temp').style.display=isAbn?'block':'none';
+    if(!isAbn)document.getElementById('temp').value=''; // 切回正常时清空数字，避免残留旧值误判
+   }
   };
  });
 });
@@ -1105,14 +1174,28 @@ function saveKid(){
  if(!curKid){toast('请先选择孩子');return;}
  const r=collectForm();
  if(r.injury==='有'&&!r.injuryText){toast('⚠️ 有外伤必须填写部位与处置');return;}
+ if(r.tempStatus==='异常'&&!r.temp&&!r.symptom&&!r.injuryText){toast('⚠️ 体温异常请填写实际温度，或说明症状/处置');return;}
  if(r.temp&&parseFloat(r.temp)>=37.3&&!r.symptom&&!r.injuryText){toast('⚠️ 体温≥37.3℃，请补充症状或处置说明');return;}
  DB.records[key(curKid)]=r;save();renderPickKid();toast('✅ 已保存，可到「日报」页生成');
 }
 function clearForm(){
- document.querySelectorAll('#inputForm .chips').forEach(g=>g.querySelectorAll('.chip').forEach(c=>c.classList.remove('sel','ok','warn','danger')));
+ // 清空 = 重置为默认值（正常状态），而不是全空。这样录下一个孩子时不用从头点
+ document.querySelectorAll('#inputForm .chips').forEach(g=>{
+  const f=g.dataset.f;const single=g.dataset.single==='1';
+  g.querySelectorAll('.chip').forEach(c=>{
+   c.classList.remove('sel','ok','warn','danger');
+   const t=c.textContent.trim();
+   let on=single?(DEFAULT_SINGLE[f]===t):(DEFAULT_MULTI[f]&&DEFAULT_MULTI[f].includes(t));
+   if(on){c.classList.add('sel');
+    if(OK_WORDS.includes(t))c.classList.add('ok');
+    if(WARN_WORDS.includes(t))c.classList.add('warn');
+    if(DANGER_WORDS.includes(t))c.classList.add('danger');}
+  });
+ });
  ['napStart','napEnd','injuryText','temp','symptom','highlight','attention'].forEach(id=>document.getElementById(id).value='');
  NOTE_FIELDS.forEach(f=>{const el=document.getElementById('note_'+f);if(el)el.value='';});
  document.getElementById('injuryBox').style.display='none';
+ document.getElementById('temp').style.display='none';
  toast('已清空');
 }
 
@@ -1153,17 +1236,18 @@ function generate(k,r,gIdx){
  if(r.highlight)lines.push(`今天的小亮点：${r.highlight} 😊`);
  if(r.injury==='有'){
   lines.push('');lines.push(`⚠️ 身体情况需要同步：${r.injuryText}`);
- }else if(r.temp||r.symptom){
+ }else if(r.tempStatus==='异常'||r.temp||r.symptom){
   let h='身体情况：';
   if(r.temp)h+=`体温 ${r.temp}℃`;
-  if(r.symptom)h+=(r.temp?'，':'')+`有${r.symptom}`;
+  else if(r.tempStatus==='异常')h+='今天体温有些偏高';
+  if(r.symptom)h+=((r.temp||r.tempStatus==='异常')?'，':'')+`有${r.symptom}`;
   h+='，我们会持续观察。';
   lines.push(h);
  }else{
-  lines.push('身体情况一切正常，没有不适。');
+  lines.push('身体情况一切正常，体温正常，没有不适。');
  }
  if(r.attention){lines.push('');lines.push(`小提示：${r.attention}`);}
- lines.push('');lines.push('—— 老师');
+ lines.push('');lines.push('—— '+getSign());
  return lines.join('\n');
 }
 function levelOf(r){return RED_CHECK(r)?'red':(YEL_CHECK(r)?'yellow':'green');}
@@ -1374,7 +1458,7 @@ function generateWeekly(k,items,mon){
  L.push(`【一条建议】${sug}`,'');
  if(a.attentions.length)L.push(`【需关注事项】${a.attentions.join('；')}`,'');
  if(a.injuries.length)L.push(`【备注】本周有 ${a.injuries.length} 次轻微外伤，当时已单独与家长同步。`,'');
- L.push('—— 老师');
+ L.push('—— '+getSign());
  return L.join('\n');
 }
 function renderWeekly(){
@@ -1649,6 +1733,78 @@ const PHRASE_FIELDS=[
  ['perf','活动投入',['主动投入','一般参与','旁观','拒绝参与']]
 ];
 let curPhraseField='energy';
+
+/* ===== 话术自动识别（纯本地关键词规则，不联网） ===== */
+// 每条规则：[维度, 状态, 触发词数组]。命中越多分越高；否定前缀会降权。
+const DETECT_RULES=[
+ // 进食
+ ['meal','全部吃完',['光盘','吃完了','一点没剩','一点不剩','干干净净','全吃完','吃得很好','都吃完了','吃得香','把汤喝完','吃得很干净','碗都见底','吃光了']],
+ ['meal','吃了大半',['吃了大半','吃了大部分','吃得挺多','吃得不错','胃口不错','吃得挺好']],
+ ['meal','吃了一半',['吃了一半','吃了半碗','一半左右']],
+ ['meal','少量',['只吃了一点','吃了一点点','吃了几口','吃得很少','吃得不多','胃口不太好','没怎么吃','吃得偏少','不太爱吃']],
+ ['meal','未进食',['没吃饭','没吃','没进食','不肯吃','拒绝吃','一口没吃','完全不吃']],
+ // 情绪
+ ['mood','愉快',['开心','笑了','乐呵','愉快','高兴','笑得很甜','笑眯眯','笑个不停','心情很好']],
+ ['mood','平静',['平静','情绪稳定','挺淡定','没什么波动','情绪平稳','安安静静的']],
+ ['mood','易烦躁',['烦躁','不耐烦','容易急','闹脾气','有点急','发脾气','急躁']],
+ ['mood','低落',['低落','闷闷不乐','不太高兴','情绪有点低','蔫蔫的不说话','没精打采','不开心']],
+ ['mood','哭闹',['哭了','哭闹','哭了一会儿','掉眼泪','哭着','分离焦虑','哭着找妈妈','哭了几次']],
+ // 精神活力
+ ['energy','非常活跃',['活力满满','特别活跃','精力充沛','很有活力','特别有精神','一刻不停','蹦蹦跳跳','跑跑跳跳','元气满满','精神头很足']],
+ ['energy','正常',['状态平稳','跟平时一样','状态不错','和平常差不多','一切正常','挺正常的']],
+ ['energy','略蔫',['有点蔫','蔫蔫','提不起劲','没精神','犯困','有点困','兴致不高','懒洋洋','状态偏低']],
+ ['energy','明显疲惫',['很累','比较累','特别累','累坏了','疲惫','累得','精神很差','眼睛睁不开','精力不够','跟不上']],
+ // 午睡
+ ['nap','正常入睡',['睡得很沉','睡得很好','午睡睡得香','睡得很香','入睡快','睡得踏实','睡得很安稳','很快就睡着','一觉睡到']],
+ ['nap','入睡困难',['入睡困难','翻来覆去','翻了一会儿','哄了一会儿','不太容易睡着','入睡慢','拍背哄','花了点时间才睡']],
+ ['nap','中途醒来',['中途醒了','醒来','睡了一会儿就醒','醒了之后','提前醒了','睡着后又醒']],
+ ['nap','未午睡',['没睡着','没午睡','午睡没睡成','没能入睡','午休没睡','中午没睡']],
+ // 排便
+ ['stool','正常',['排便正常','大便正常','排便情况正常','大便成形']],
+ ['stool','偏干硬',['偏干','有点干','大便干','干硬','大便有点硬','排便偏干','不太通畅']],
+ ['stool','偏稀',['偏稀','有点稀','大便稀','不成形','拉稀','稀一些']],
+ ['stool','异常',['排便异常','大便异常','情况有些异常','不太寻常','需要留意','有点异常']],
+ // 加餐
+ ['snack','正常',['加餐正常','点心吃得不错','加餐都吃了']],
+ ['snack','少量',['加餐只吃了一点','点心吃得少','加餐吃得不多','点心剩了些']],
+ ['snack','未吃',['加餐没吃','点心没吃','没吃加餐','不肯吃点心']],
+ // 社交
+ ['social','主动合作',['主动合作','主动和小朋友','一起玩','合作','一起搭','和小朋友玩得很开心','一起做饭','拉着小朋友']],
+ ['social','被动跟随',['被动跟随','跟着小朋友','跟着玩','跟着一起']],
+ ['social','独处',['自己玩','独处','一个人玩','喜欢自己玩','在旁边自己']],
+ ['social','有冲突',['有冲突','冲突','抢玩具','推了','打人','吵了起来','起了争执','小摩擦','抢了']],
+ // 活动投入
+ ['perf','主动投入',['主动投入','特别投入','玩得很专注','很感兴趣','特别认真','专注地']],
+ ['perf','一般参与',['一般参与','参与了一下','跟着做了']],
+ ['perf','旁观',['旁观','在旁边看','看着别人','看了很久','观察']],
+ ['perf','拒绝参与',['拒绝参与','不肯参加','不愿意玩','不想玩','不肯做']],
+];
+// 否定/弱化前缀：出现这些词说明状态相反或不成立，降低该规则得分
+const NEG_MARKS=['没','不','未','无','别','没有','不太'];
+
+function detectPhrase(line){
+ const s=String(line||'').trim();
+ if(!s)return {field:null,value:null,score:0,hits:[],candidates:[]};
+ const scored=[];
+ DETECT_RULES.forEach(([field,value,kws])=>{
+  let score=0;const hits=[];
+  kws.forEach(kw=>{
+   const idx=s.indexOf(kw);
+   if(idx>=0){
+    // 检查关键词紧邻前 2 字是否有否定词（如「没哭」「不肯吃」）。
+    // 窗口必须窄：太宽会把无关的否定词算进来（「今天没哭，情绪稳定」会误判「情绪稳定」）
+    const before=s.slice(Math.max(0,idx-2),idx);
+    const negated=NEG_MARKS.some(n=>before.includes(n));
+    if(negated){score-=2;}else{score+=kw.length>=3?3:2;hits.push(kw);}
+   }
+  });
+  if(score>0)scored.push({field,value,score,hits});
+ });
+ if(!scored.length)return {field:null,value:null,score:0,hits:[],candidates:[]};
+ scored.sort((a,b)=>b.score-a.score);
+ return {field:scored[0].field,value:scored[0].value,score:scored[0].score,hits:scored[0].hits,candidates:scored.slice(0,3)};
+}
+
 /* ===== 粘贴导入 ===== */
 function renderPasteSelectors(){
  const fs=document.getElementById('piField');
@@ -1662,23 +1818,104 @@ function renderPasteSelectors(){
 function pasteImport(){
  const field=document.getElementById('piField').value;
  const value=document.getElementById('piValue').value;
- const raw=document.getElementById('piText').value||'';
+ const raw=document.getElementById('piText2').value||'';
  const lines=raw.split('\n').map(s=>s.trim()).filter(Boolean);
- const st=document.getElementById('piStatus');
+ const st=document.getElementById('piStatus2');
  if(!lines.length){st.textContent='请先粘贴内容（每行一条）。';toast('没有可导入的内容');return;}
+ const r=importLinesTo(lines,field,value);
+ const label=(PHRASE_FIELDS.find(x=>x[0]===field)||[])[1]||field;
+ st.textContent=`已导入 ${r.added} 条到「${label} / ${value}」${r.skipped?`（${r.skipped} 条重复已跳过）`:''}。`;
+ document.getElementById('piText2').value='';
+ renderPhrasePage();
+ toast(r.added?`已导入 ${r.added} 条`:'内容已存在，未新增');
+}
+
+// 把若干行导入指定维度/状态，返回 {added, skipped}
+function importLinesTo(lines,field,value){
  DB.phrases=DB.phrases||{};DB.phrases[field]=DB.phrases[field]||{};
  const cur=DB.phrases[field][value]||[];
  const base=Array.isArray(PH[field][value])?PH[field][value]:[PH[field][value]];
- const existed={};
- base.forEach(s=>existed[s]=1);cur.forEach(s=>existed[s]=1);
+ const existed={};base.forEach(s=>existed[s]=1);cur.forEach(s=>existed[s]=1);
  let added=0,skipped=0;
  lines.forEach(s=>{if(existed[s]){skipped++;}else{existed[s]=1;cur.push(s);added++;}});
  if(added){DB.phrases[field][value]=cur;save();}
- const label=(PHRASE_FIELDS.find(x=>x[0]===field)||[])[1]||field;
- st.textContent=`已导入 ${added} 条到「${label} / ${value}」${skipped?`（${skipped} 条重复已跳过）`:''}。当前该值共 ${cur.length+base.length} 条措辞可用。`;
+ return {added,skipped};
+}
+
+/* ===== 自动识别 + 预览确认 ===== */
+let piDetected=[]; // [{text, field, value, hits}]
+function clearPiText(){document.getElementById('piText').value='';document.getElementById('piPreview').innerHTML='';document.getElementById('piStatus').textContent='';piDetected=[];}
+
+function autoDetect(){
+ const raw=document.getElementById('piText').value||'';
+ const lines=raw.split('\n').map(s=>s.trim()).filter(Boolean);
+ const st=document.getElementById('piStatus');
+ const box=document.getElementById('piPreview');
+ if(!lines.length){st.textContent='请先粘贴内容（每行一条）。';box.innerHTML='';return;}
+ piDetected=lines.map(t=>{
+  const d=detectPhrase(t);
+  return {text:t,field:d.field,value:d.value,hits:d.hits||[]};
+ });
+ const okN=piDetected.filter(x=>x.field).length;
+ const missN=piDetected.length-okN;
+ st.innerHTML=`共 ${piDetected.length} 条：<b style="color:var(--green)">${okN} 条已自动识别</b>${missN?`，<b style="color:var(--yellow)">${missN} 条未识别（请手动选）</b>`:''}。请在下方核对/修改归类，然后点「确认导入」。`;
+ renderPiPreview();
+}
+
+function renderPiPreview(){
+ const box=document.getElementById('piPreview');
+ if(!piDetected.length){box.innerHTML='';return;}
+ box.innerHTML=piDetected.map((x,i)=>{
+  const fOpts=PHRASE_FIELDS.map(([f,label])=>`<option value="${f}" ${f===x.field?'selected':''}>${label}</option>`).join('');
+  const curDef=PHRASE_FIELDS.find(d=>d[0]===x.field);
+  const vOpts=curDef?curDef[2].map(v=>`<option value="${v}" ${v===x.value?'selected':''}>${v}</option>`).join(''):'<option>（先选维度）</option>';
+  const tag=x.field?`<span class="tag b-green">已识别</span>`:`<span class="tag b-yellow">未识别·请选</span>`;
+  const hitTxt=x.hits.length?`<span class="hint" style="margin-left:6px">命中：${x.hits.join('、')}</span>`:'';
+  return `<div style="border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;background:#fff">
+    <div style="font-size:13px;font-weight:600;margin-bottom:6px">${x.text} ${tag}${hitTxt}</div>
+    <div class="row2">
+      <div><select id="piF${i}" onchange="piFieldChange(${i})">${fOpts}</select></div>
+      <div><select id="piV${i}" onchange="piValueChange(${i})">${vOpts}</select></div>
+    </div>
+  </div>`;
+ }).join('')+`
+ <div class="copy-row" style="margin-top:12px">
+   <button class="btn btn-g" onclick="confirmPiImport()">✅ 确认导入</button>
+   <button class="btn" onclick="clearPiText()">取消</button>
+ </div>`;
+}
+function piFieldChange(i){
+ const f=document.getElementById('piF'+i).value;
+ piDetected[i].field=f;
+ const def=PHRASE_FIELDS.find(d=>d[0]===f);
+ const vs=document.getElementById('piV'+i);
+ vs.innerHTML=def[2].map(v=>`<option value="${v}">${v}</option>`).join('');
+ piDetected[i].value=def[2][0];
+}
+function piValueChange(i){piDetected[i].value=document.getElementById('piV'+i).value;}
+
+function confirmPiImport(){
+ if(!piDetected.length){toast('没有可导入的内容');return;}
+ // 校验：所有条目都必须有维度和状态
+ const bad=piDetected.filter(x=>!x.field||!x.value);
+ if(bad.length){toast(`还有 ${bad.length} 条未选好归类，请补全后再导入`);return;}
+ // 按 维度/状态 分组导入
+ const groups={};
+ piDetected.forEach(x=>{const k=x.field+'|'+x.value;(groups[k]=groups[k]||[]).push(x.text);});
+ let totalAdded=0,totalSkipped=0;const parts=[];
+ Object.keys(groups).forEach(k=>{
+  const [field,value]=k.split('|');
+  const r=importLinesTo(groups[k],field,value);
+  totalAdded+=r.added;totalSkipped+=r.skipped;
+  const label=(PHRASE_FIELDS.find(x=>x[0]===field)||[])[1]||field;
+  if(r.added)parts.push(`${label}/${value} +${r.added}`);
+ });
+ document.getElementById('piStatus').innerHTML=`导入完成：<b>${totalAdded} 条新增</b>${totalSkipped?`，${totalSkipped} 条重复已跳过`:''}${parts.length?`（${parts.join('、')}）`:''}。`;
  document.getElementById('piText').value='';
+ document.getElementById('piPreview').innerHTML='';
+ piDetected=[];
  renderPhrasePage();
- toast(added?`已导入 ${added} 条`:'内容已存在，未新增');
+ toast(totalAdded?`已导入 ${totalAdded} 条`:'内容已存在，未新增');
 }
 
 function renderPhrasePage(){
