@@ -166,10 +166,10 @@ input[type=text],input[type=number],textarea,select{padding:11px 12px;font-size:
       <div class="row2">
         <div><input type="text" id="newName" placeholder="孩子姓名，如：张小明"></div>
         <div style="flex:0 0 160px"><input type="text" id="newParent" placeholder="称呼，如：小明妈妈"></div>
-        <div style="flex:0 0 110px"><button class="btn btn-p" onclick="addKid()">＋ 添加</button></div>
+        <div style="flex:0 0 150px"><input type="text" id="newNick" placeholder="小名/别名（选填），如：明明"></div>
       </div>
       <div class="row2" style="margin-top:8px">
-        <div><input type="text" id="newNick" placeholder="小名/别名（选填），如：明明、乐乐"></div>
+        <div style="flex:0 0 110px"><button class="btn btn-p" onclick="addKid()">＋ 添加</button></div>
         <div class="hint" style="flex:1;align-self:center">填了小名，日报里就用小名（更亲切）；不填则自动用姓名去掉姓氏（张小明 → 小明）</div>
       </div>
       <hr>
