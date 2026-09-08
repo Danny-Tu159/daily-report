@@ -1,0 +1,1876 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>幼儿园日报助手 · 本地版</title>
+<meta name="theme-color" content="#4f7cff">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="日报助手">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<style>
+:root{
+  --bg:#f4f6fa;--card:#fff;--ink:#1f2937;--sub:#6b7280;--line:#e5e7eb;
+  --brand:#4f7cff;--brand-soft:#eef2ff;--green:#16a34a;--green-soft:#e8f7ee;
+  --yellow:#d97706;--yellow-soft:#fef6e4;--red:#dc2626;--red-soft:#fdecec;
+  --purple:#7c3aed;--purple-soft:#f3ecfe;--radius:14px;--shadow:0 2px 10px rgba(31,41,55,.07);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;background:var(--bg);color:var(--ink);padding-bottom:60px}
+.wrap{max-width:1080px;margin:0 auto;padding:16px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand .logo{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#4f7cff,#7c3aed);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px}
+.brand h1{font-size:18px}
+.brand small{display:block;font-size:11px;color:var(--sub);font-weight:400;margin-top:1px}
+.top .ops{display:flex;gap:8px}
+.btn{border:none;border-radius:11px;padding:10px 16px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;background:#fff;border:1.5px solid var(--line);color:var(--ink)}
+.btn:hover{border-color:var(--brand);color:var(--brand)}
+.btn-p{background:var(--brand);color:#fff;border-color:var(--brand)}
+.btn-p:hover{background:#3b5bdb;color:#fff}
+.btn-g{background:var(--green);color:#fff;border-color:var(--green)}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:9px}
+.tabs{display:flex;background:#fff;border-radius:999px;padding:4px;box-shadow:var(--shadow);margin-bottom:16px;width:fit-content}
+.tabs button{border:none;background:transparent;padding:9px 20px;border-radius:999px;font-size:13.5px;color:var(--sub);cursor:pointer;font-weight:600}
+.tabs button.on{background:var(--brand);color:#fff}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:14px}
+.card h3{font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tag{font-size:10.5px;font-weight:600;padding:3px 9px;border-radius:999px}
+.b-blue{background:var(--brand-soft);color:#3b5bdb}.b-green{background:var(--green-soft);color:var(--green)}
+.b-yellow{background:var(--yellow-soft);color:var(--yellow)}.b-red{background:var(--red-soft);color:var(--red)}
+.b-purple{background:var(--purple-soft);color:var(--purple)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.kid{border:1.5px solid var(--line);border-radius:12px;padding:10px;cursor:pointer;transition:.15s;background:#fff;position:relative}
+.kid:hover{border-color:var(--brand)}
+.kid.on{border-color:var(--brand);background:var(--brand-soft)}
+.kid.done{border-color:var(--green)}
+.kid.done::after{content:"✓";position:absolute;top:6px;right:8px;color:var(--green);font-weight:700;font-size:13px}
+.kid .nm{font-size:13.5px;font-weight:600}
+.kid .st{font-size:11px;color:var(--sub);margin-top:2px}
+.kid .del{position:absolute;top:4px;right:4px;width:22px;height:22px;line-height:22px;text-align:center;border-radius:50%;background:#f3f4f6;color:#9ca3af;font-size:11px;border:none;cursor:pointer;opacity:.55}
+.kid .del:hover{background:var(--red-soft);color:var(--red);opacity:1}
+.kid .rec{font-size:10.5px;color:var(--sub);margin-top:3px}
+.fl{font-size:12px;color:var(--sub);margin:14px 0 6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.fl:first-child{margin-top:0}
+.req{color:var(--red);font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-size:12.5px;cursor:pointer;transition:.15s;user-select:none}
+.chip:hover{border-color:var(--brand)}
+.chip.sel{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:600}
+.chip.sel.ok{background:var(--green);border-color:var(--green)}
+.chip.sel.warn{background:var(--yellow);border-color:var(--yellow)}
+.chip.sel.danger{background:var(--red);border-color:var(--red)}
+input[type=text],input[type=number],textarea,select{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:9px 11px;font-size:13px;font-family:inherit;color:var(--ink);background:#fff}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--brand)}
+textarea{resize:vertical;min-height:60px;line-height:1.7}
+.row2{display:flex;gap:10px}
+.row2>*{flex:1}
+.dim-note{margin-top:7px;font-size:12.5px!important;padding:7px 10px!important;border-style:dashed!important;background:#fcfdff!important;color:#374151}
+.dim-note::placeholder{color:#b6bcc7;font-size:11.5px}
+.out{background:#fafbfe;border:1.5px solid var(--line);border-radius:12px;padding:14px;font-size:13.5px;line-height:1.85;white-space:pre-wrap;word-break:break-word}
+.out.red{background:var(--red-soft);border-color:#fca5a5}
+.out.yellow{background:var(--yellow-soft);border-color:#fcd34d}
+.warnbox{border-radius:11px;padding:11px 13px;font-size:12px;line-height:1.75;margin-bottom:12px}
+.wb-red{background:var(--red-soft);color:#991b1b}
+.wb-yellow{background:var(--yellow-soft);color:#92400e}
+.wb-blue{background:var(--brand-soft);color:#3730a3}
+.wb-green{background:var(--green-soft);color:#166534}
+.stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.stat .s{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:12px;text-align:center;cursor:pointer;transition:.15s;user-select:none;-webkit-tap-highlight-color:transparent}
+.stat .s:hover{border-color:var(--brand)}
+.stat .s.sel{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.stat .s.sel .l{color:var(--brand);font-weight:700}
+.stat .n{font-size:22px;font-weight:800}
+.stat .l{font-size:11px;color:var(--sub);margin-top:2px}
+.batch-item{border:1.5px solid var(--line);border-radius:12px;padding:13px;margin-bottom:10px;background:#fff}
+.batch-item.red{border-color:#fca5a5;background:var(--red-soft)}
+.batch-item.yellow{border-color:#fcd34d;background:var(--yellow-soft)}
+.batch-item .hd{display:flex;align-items:center;gap:8px;margin-bottom:9px;flex-wrap:wrap}
+.batch-item .hd .nm{font-weight:700;font-size:14px}
+.batch-item .txt{font-size:12.5px;line-height:1.8;background:#fff;border-radius:10px;padding:11px;border:1px solid var(--line)}
+.batch-item.red .txt,.batch-item.yellow .txt{border-color:transparent}
+.batch-item .ops{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.empty{text-align:center;color:var(--sub);font-size:13px;padding:28px 0;line-height:1.9}
+.page{display:none}.page.on{display:block}
+.toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:rgba(15,23,42,.93);color:#fff;padding:11px 22px;border-radius:999px;font-size:13px;opacity:0;pointer-events:none;transition:.3s;z-index:99}
+.toast.show{opacity:1}
+.mask{position:fixed;inset:0;background:rgba(15,23,42,.5);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+.mask.show{display:flex}
+.modal{background:#fff;border-radius:18px;padding:22px;width:100%;max-width:460px;max-height:88vh;overflow-y:auto}
+.modal h3{font-size:17px;margin-bottom:14px}
+.modal .ops{display:flex;gap:8px;margin-top:16px}
+hr{border:none;border-top:1px solid var(--line);margin:16px 0}
+.hint{font-size:11.5px;color:var(--sub);line-height:1.75}
+.copy-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+@media(max-width:640px){
+.grid{grid-template-columns:repeat(2,1fr)}.row2{flex-direction:column}.wrap{padding:10px 12px calc(78px + env(safe-area-inset-bottom))}
+/* App 化：底部固定导航栏 */
+.tabs{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;display:flex;border-radius:0;margin:0;padding:6px 2px calc(6px + env(safe-area-inset-bottom));background:rgba(255,255,255,.97);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 -2px 14px rgba(31,41,55,.1);border-top:1px solid var(--line);z-index:50;justify-content:space-around;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tabs button{flex:1 0 auto;min-width:0;padding:4px 2px;font-size:9.5px;line-height:1.25;border-radius:9px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--sub)}
+.tabs button.on{background:var(--brand-soft);color:var(--brand)}
+/* 加大触控目标 */
+.chip{padding:9px 14px;font-size:13px;-webkit-tap-highlight-color:transparent}
+.btn{padding:12px 16px;font-size:13.5px;-webkit-tap-highlight-color:transparent}
+.btn-sm{padding:9px 13px}
+input[type=text],input[type=number],textarea,select{padding:11px 12px;font-size:14px}
+.kid{padding:13px 10px;-webkit-tap-highlight-color:transparent}
+/* 顶部栏精简 */
+.top{position:sticky;top:0;z-index:40;background:var(--bg);padding:10px 0 8px;margin-bottom:8px;border-radius:0}
+.top .brand .logo{width:34px;height:34px;font-size:18px}
+.top h1{font-size:15.5px}
+.top small{font-size:9.5px;line-height:1.35}
+.top .ops .btn{padding:7px 9px;font-size:11px}
+.card{padding:14px;border-radius:12px}
+/* 禁双击缩放 / 长按弹菜单（保留输入框可选中） */
+.chip,.kid,.tabs button,.btn{-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
+.dim-note,.out,textarea,input{-webkit-touch-callout:default;user-select:text;-webkit-user-select:text}
+}
+/* 独立窗口模式（添加到桌面后）：隐藏浏览器元素残留间距 */
+@media(display-mode:standalone){.wrap{padding-top:calc(10px + env(safe-area-inset-top))}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">
+      <div class="logo">🧸</div>
+      <div><h1>幼儿园日报助手</h1><small>个人自用本地版 · 数据只存在你自己浏览器里 · 无需服务器、无需资质</small></div>
+    </div>
+    <div class="ops">
+      <button class="btn btn-sm" onclick="exportData()">💾 导出备份</button>
+      <button class="btn btn-sm" onclick="document.getElementById('importFile').click()">📂 导入备份</button>
+      <input type="file" id="importFile" accept=".json" class="hidden" style="display:none" onchange="importData(event)">
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="on" onclick="go('pRoster',this)"><span>👶</span>名单</button>
+    <button onclick="go('pInput',this)"><span>✏️</span>录入</button>
+    <button onclick="go('pReport',this)"><span>📝</span>日报</button>
+    <button onclick="go('pBatch',this)"><span>📋</span>批量</button>
+    <button onclick="go('pWeekly',this)"><span>📊</span>周报</button>
+    <button onclick="go('pNotice',this)"><span>📢</span>通知</button>
+    <button onclick="go('pPhrases',this)"><span>🎨</span>文案库</button>
+    <button onclick="go('pHelp',this)"><span>❓</span>用法</button>
+  </div>
+
+  <!-- 名单 -->
+  <div class="page on" id="pRoster">
+    <div class="card">
+      <h3>👶 班级名单 <span class="tag b-blue" id="rosterCount">0 人</span></h3>
+      <div class="warnbox wb-blue">名单只保存在<b>你这台设备的浏览器</b>里（localStorage）。不联网、不上传、不共享。换设备或清缓存前请先点右上角「导出备份」。</div>
+      <div class="row2">
+        <div><input type="text" id="newName" placeholder="孩子姓名，如：张小明"></div>
+        <div style="flex:0 0 160px"><input type="text" id="newParent" placeholder="称呼，如：小明妈妈"></div>
+        <div style="flex:0 0 110px"><button class="btn btn-p" onclick="addKid()">＋ 添加</button></div>
+      </div>
+      <div class="row2" style="margin-top:8px">
+        <div><input type="text" id="newNick" placeholder="小名/别名（选填），如：明明、乐乐"></div>
+        <div class="hint" style="flex:1;align-self:center">填了小名，日报里就用小名（更亲切）；不填则自动用姓名去掉姓氏（张小明 → 小明）</div>
+      </div>
+      <hr>
+      <div class="grid" id="rosterGrid"></div>
+      <hr>
+      <div class="row2">
+        <div><button class="btn btn-sm" onclick="openImportRoster()">📋 批量粘贴添加</button></div>
+        <div><button class="btn btn-sm btn-p" onclick="document.getElementById('rosterFile').click()">📊 Excel 导入名单</button></div>
+        <input type="file" id="rosterFile" accept=".csv,.tsv,.txt,.xlsx,.xls" style="display:none" onchange="importRosterFile(event)">
+        <div><button class="btn btn-sm" onclick="loadDemo()">✨ 载入示例名单（7人）</button></div>
+      </div>
+      <div class="hint" style="margin-top:8px">Excel 导入：第一列<b>孩子姓名</b>、第二列<b>称呼</b>（如"小明妈妈"）、第三列<b>小名</b>（选填，如"明明"）。支持 .csv / .xlsx。导入前会先让你预览确认，可选择「仅新增」「新增并更新称呼」「以表格为准（移除表里没有的）」三种方式。<br><b>小名的作用：</b>填了小名，日报里就用小名称呼孩子（如"明明今天看起来比较累"）；不填则自动用姓名去掉姓氏（张小明 → "小明今天……"）。</div>
+    </div>
+  </div>
+
+  <!-- 名单导入预览 -->
+  <div class="mask" id="rosterMask">
+    <div class="modal">
+      <h3>名单导入预览</h3>
+      <div class="warnbox wb-blue" id="rosterStat"></div>
+      <div class="fl">导入方式</div>
+      <div class="chips" id="rosterModeChips" data-single="1">
+        <div class="chip sel">仅新增</div>
+        <div class="chip">新增并更新称呼</div>
+        <div class="chip warn">以表格为准</div>
+      </div>
+      <div class="hint" style="margin:8px 0">「以表格为准」会<b>移除表格里没有的孩子</b>（其历史记录一并删除），仅在你换了整份班级名单时使用。</div>
+      <div style="max-height:220px;overflow:auto" id="rosterPreview"></div>
+      <div class="ops">
+        <button class="btn" style="flex:1" onclick="closeRosterModal()">取消</button>
+        <button class="btn btn-p" style="flex:1" onclick="applyRosterImport()">✅ 确认导入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 录入 -->
+  <div class="page" id="pInput">
+    <div class="card">
+      <h3>✏️ 今日录入 <span class="tag b-blue" id="dateLabel"></span></h3>
+      <div class="fl">选择日期（可补录前几天漏记的）</div>
+      <div class="row2">
+        <div><input type="date" id="datePick" onchange="changeDate()"></div>
+        <div style="flex:0 0 110px"><button class="btn" onclick="backToday()">回到今天</button></div>
+      </div>
+      <div class="hint" id="dateHint" style="margin-bottom:8px"></div>
+      <div class="warnbox wb-blue">全程<b>点选</b>，只有「今日亮点」和「需家长关注」需要打几个字。红色标记字段 AI 不会自动生成，必须你自己确认。</div>
+      <div class="grid" id="pickKid"></div>
+    </div>
+
+    <div class="card" id="inputForm" style="display:none">
+      <h3>✏️ <span id="curName"></span> · <span id="curParent" style="color:var(--sub);font-weight:400"></span></h3>
+
+      <div class="fl">出勤状态 <span class="req">● 强制确认</span></div>
+      <div class="chips" data-f="attendance" data-single="1">
+        <div class="chip sel ok">正常出勤</div><div class="chip">请假</div><div class="chip warn">病假</div><div class="chip">迟到</div><div class="chip">早退</div>
+      </div>
+      <input type="text" id="note_attendance" class="dim-note" placeholder="补充说明（选填），如：9点才到，早上在家闹情绪">
+
+      <div class="fl">精神活力</div>
+      <div class="chips" data-f="energy" data-single="1">
+        <div class="chip ok">非常活跃</div><div class="chip sel">正常</div><div class="chip warn">略蔫</div><div class="chip danger">明显疲惫</div>
+      </div>
+      <input type="text" id="note_energy" class="dim-note" placeholder="补充说明（选填），如：上午特别兴奋，下午有点犯困">
+
+      <div class="fl">情绪基调</div>
+      <div class="chips" data-f="mood" data-single="1">
+        <div class="chip ok">愉快</div><div class="chip sel">平静</div><div class="chip warn">易烦躁</div><div class="chip warn">低落</div><div class="chip danger">哭闹</div>
+      </div>
+      <input type="text" id="note_mood" class="dim-note" placeholder="补充说明（选填），如：早上分离时哭了5分钟，抱一会儿就好">
+
+      <div class="fl">早餐</div>
+      <div class="chips" data-f="breakfast" data-single="1">
+        <div class="chip ok">全部吃完</div><div class="chip sel">吃了大半</div><div class="chip">吃了一半</div><div class="chip warn">少量</div><div class="chip danger">未进食</div>
+      </div>
+      <input type="text" id="note_breakfast" class="dim-note" placeholder="补充说明（选填），如：今天有牛奶，喝完了">
+
+      <div class="fl">午餐</div>
+      <div class="chips" data-f="lunch" data-single="1">
+        <div class="chip ok">全部吃完</div><div class="chip sel">吃了大半</div><div class="chip">吃了一半</div><div class="chip warn">少量</div><div class="chip danger">未进食</div>
+      </div>
+      <input type="text" id="note_lunch" class="dim-note" placeholder="补充说明（选填），如：今天的红烧肉很喜欢，主动添了一次">
+
+      <div class="fl">午餐挑食项（可多选）</div>
+      <div class="chips" data-f="pick">
+        <div class="chip">蔬菜</div><div class="chip">肉类</div><div class="chip">主食</div><div class="chip">汤</div><div class="chip">水果</div><div class="chip sel">无</div>
+      </div>
+      <input type="text" id="note_pick" class="dim-note" placeholder="补充说明（选填），如：胡萝卜挑出来了，青菜愿意吃一口">
+
+      <div class="fl">加餐</div>
+      <div class="chips" data-f="snack" data-single="1">
+        <div class="chip sel ok">正常</div><div class="chip warn">少量</div><div class="chip warn">未吃</div>
+      </div>
+      <input type="text" id="note_snack" class="dim-note" placeholder="补充说明（选填），如：今天点心是酸奶，很喜欢">
+
+      <div class="fl">排便次数</div>
+      <div class="chips" data-f="stoolCount" data-single="1">
+        <div class="chip">0次</div><div class="chip sel ok">1次</div><div class="chip">2次</div><div class="chip">3次+</div>
+      </div>
+      <input type="text" id="note_stoolCount" class="dim-note" placeholder="补充说明（选填），如：上午集体如厕时">
+
+      <div class="fl">排便性状 <span class="req">● 强制确认</span></div>
+      <div class="chips" data-f="stoolStatus" data-single="1">
+        <div class="chip sel ok">正常</div><div class="chip warn">偏干硬</div><div class="chip warn">偏稀</div><div class="chip danger">异常</div>
+      </div>
+      <input type="text" id="note_stoolStatus" class="dim-note" placeholder="补充说明（选填），如：比前两天好一些">
+
+      <div class="fl">午睡情况</div>
+      <div class="chips" data-f="nap" data-single="1">
+        <div class="chip sel ok">正常入睡</div><div class="chip warn">入睡困难</div><div class="chip warn">中途醒来</div><div class="chip warn">未午睡</div>
+      </div>
+      <input type="text" id="note_nap" class="dim-note" placeholder="补充说明（选填），如：要老师拍背才睡着，睡得很沉">
+      <div class="row2" style="margin-top:8px">
+        <div><input type="text" id="napStart" placeholder="开始 12:30"></div>
+        <div><input type="text" id="napEnd" placeholder="结束 14:20"></div>
+      </div>
+
+      <div class="fl">是否有外伤 <span class="req">● 红线</span></div>
+      <div class="chips" data-f="injury" data-single="1">
+        <div class="chip sel ok">无</div><div class="chip danger">有</div>
+      </div>
+      <div id="injuryBox" style="display:none">
+        <div class="fl">外伤部位与处置（请如实填写，不会自动补全）</div>
+        <textarea id="injuryText" placeholder="例：13:50 户外滑滑梯，右膝盖擦伤一小块，已消毒贴创可贴，14:05 电话通知妈妈"></textarea>
+      </div>
+
+      <div class="fl">体温（℃，留空=未测）<span class="req">● 红线</span></div>
+      <div class="row2">
+        <div style="flex:0 0 140px"><input type="text" id="temp" placeholder="如 36.5"></div>
+        <div><input type="text" id="symptom" placeholder="不适症状，如：咳嗽、流涕（留空=无）"></div>
+      </div>
+
+      <div class="fl">参与活动（可多选）</div>
+      <div class="chips" data-f="activity">
+        <div class="chip sel">自由游戏</div><div class="chip">积木</div><div class="chip">绘画</div><div class="chip">音乐</div><div class="chip">户外</div><div class="chip">绘本</div><div class="chip">角色扮演</div><div class="chip">科学实验</div>
+      </div>
+      <input type="text" id="note_activity" class="dim-note" placeholder="补充说明（选填），如：搭了个停车场，讲了半天">
+
+      <div class="fl">社交互动</div>
+      <div class="chips" data-f="social" data-single="1">
+        <div class="chip ok">主动合作</div><div class="chip sel">被动跟随</div><div class="chip">独处</div><div class="chip danger">有冲突</div>
+      </div>
+      <input type="text" id="note_social" class="dim-note" placeholder="补充说明（选填），如：和朵朵一起给娃娃做饭，玩了很久">
+
+      <div class="fl">今日亮点（1 句话，日报会用到它）</div>
+      <textarea id="highlight" placeholder="例：和乐乐争积木，引导后一起搭了大城堡"></textarea>
+
+      <div class="fl">需家长关注（留空则日报不出现这段）</div>
+      <textarea id="attention" placeholder="例：这两天早上分离焦虑有点明显，建议出门前多陪5分钟"></textarea>
+
+      <hr>
+      <div class="copy-row">
+        <button class="btn btn-p" onclick="saveKid()">✅ 保存</button>
+        <button class="btn" onclick="clearForm()">清空本条</button>
+        <span class="hint" style="align-self:center">保存后可在「日报」页生成文案</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 日报 -->
+  <div class="page" id="pReport">
+    <div class="card">
+      <h3>📝 生成日报 <span class="tag b-purple" id="repName">未选择</span></h3>
+      <div id="repDateHint" class="hint" style="margin-bottom:8px"></div>
+      <div class="warnbox wb-blue">
+        这个工具<b>不联网、不调大模型</b>，日报由本地模板按你录入的字段拼装。<b>好处：零成本、零隐私风险、永不编造事实</b>。<br>
+        如果你想要更有文采的版本：点下方「复制录入摘要」→ 粘贴到任意 AI 对话框 → 配上提示词即可（提示词见「用法」页）。
+      </div>
+      <div class="grid" id="repPick"></div>
+      <hr>
+      <div id="repBody" style="display:none">
+        <div id="repWarn"></div>
+        <div class="out" id="repText"></div>
+        <div class="copy-row">
+          <button class="btn btn-g" onclick="copyRep()">📋 复制日报（直接粘贴到微信）</button>
+          <button class="btn" onclick="copySummary()">🤖 复制录入摘要（喂给AI）</button>
+          <button class="btn btn-sm" onclick="regenerate()">🔄 换个开头</button>
+          <span class="hint" style="align-self:center" id="repLen"></span>
+        </div>
+        <div id="markSent" style="margin-top:10px">
+          <button class="btn btn-sm btn-g" onclick="markSent()">✓ 标记为已发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 批量 -->
+  <div class="page" id="pBatch">
+    <div class="card">
+      <h3>📋 批量日报 <span class="tag b-blue" id="batchCount">0 条</span></h3>
+      <div id="batchDateHint" class="hint" style="margin-bottom:8px"></div>
+      <div class="stat" id="batchStat"></div>
+      <div class="hint" style="margin-top:6px">👆 点上方色块可按分类查看（再点一次恢复全部）</div>
+      <hr>
+      <div class="warnbox wb-red">🔒 <b>标红条目（外伤 / 发热 / 冲突 / 异常）禁止一键批量发送。</b>请逐条核对后单独复制。这是责任问题，不是效率问题。</div>
+      <div class="copy-row">
+        <button class="btn btn-g" onclick="copyAllGreen()">📋 一键复制全部标绿</button>
+        <button class="btn" onclick="copyAll()">复制全部（含标红，自行核对）</button>
+      </div>
+      <hr>
+      <div id="batchList"></div>
+    </div>
+  </div>
+
+  <!-- 周报 -->
+  <div class="page" id="pWeekly">
+    <div class="card">
+      <h3>📊 周报生成 <span class="tag b-blue" id="weekLabel"></span></h3>
+      <div class="warnbox wb-blue">
+        周报由本周已有的日报记录<b>自动聚合</b>而成（出勤、食欲、排便、午睡、情绪、社交、活动偏好、亮点事例）。<br>
+        <b>前提：本周至少有 2 天录入记录。</b>数据不足的维度会如实标注「本周数据较少」，不会编造。
+      </div>
+      <div class="row2" style="align-items:flex-end">
+        <div>
+          <div class="fl">选择周次</div>
+          <select id="weekSelect" onchange="renderWeeklyPick()"></select>
+        </div>
+        <div><span class="hint" id="weekStat"></span></div>
+      </div>
+      <hr>
+      <div class="grid" id="weeklyPick"></div>
+      <hr>
+      <div id="weeklyBody" style="display:none">
+        <div id="weeklyWarn"></div>
+        <div class="out" id="weeklyText"></div>
+        <div class="copy-row">
+          <button class="btn btn-g" onclick="copyWeekly()">📋 复制周报</button>
+          <button class="btn" onclick="copyWeeklySummary()">🤖 复制聚合数据（喂给AI润色）</button>
+          <span class="hint" style="align-self:center" id="weeklyLen"></span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>📋 全班周报（一键生成）</h3>
+      <div class="hint" style="margin-bottom:10px">把本周所有已录入孩子的周报一次生成，标绿的批量复制，标黄的（数据不足/有异常）逐条核对。</div>
+      <div class="copy-row">
+        <button class="btn btn-p" onclick="genAllWeekly()">✨ 生成全班周报</button>
+        <button class="btn btn-g" onclick="copyAllWeekly()">📋 一键复制全部周报</button>
+      </div>
+      <hr>
+      <div id="weeklyList"></div>
+    </div>
+  </div>
+
+  <!-- 通知公告 -->
+  <div class="page" id="pNotice">
+    <div class="card">
+      <h3>📢 通知公告模板 <span class="tag b-purple">6 类模板 + 自定义</span></h3>
+      <div class="warnbox wb-red">
+        🔒 <b>费用、时间、名额、地点等事实信息必须你自己填写。</b>工具不会自动补全或推测——缺失字段会留空提示，绝不编数字。这是家长最容易投诉的地方。
+      </div>
+      <div class="chips" id="noticeType" data-single="1">
+        <div class="chip sel">兴趣班报名</div>
+        <div class="chip">活动通知</div>
+        <div class="chip">放假安排</div>
+        <div class="chip">物品准备</div>
+        <div class="chip">健康提醒</div>
+        <div class="chip">家长会</div>
+        <div class="chip">自定义通知</div>
+      </div>
+      <hr>
+      <div class="fl">通知语气（开头 / 结尾 / 温馨提示都会跟着变）</div>
+      <div class="chips" id="noticeToneChips" data-single="1">
+        <div class="chip sel">亲切活泼</div>
+        <div class="chip">温和正式</div>
+        <div class="chip">简洁干练</div>
+      </div>
+      <div class="hint" style="margin-top:6px">语气措辞可在「文案库」页自定义，每类内置 16 条轮换，点「换一版」会换措辞。</div>
+      <hr>
+      <div id="noticeFields"></div>
+      <hr>
+      <div class="copy-row">
+        <button class="btn btn-p" onclick="genNotice()">✨ 生成通知</button>
+        <button class="btn" onclick="regenNotice()">🔄 换一版</button>
+        <button class="btn" onclick="clearNotice()">清空</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>👀 生成预览</h3>
+      <div class="out" id="noticeText">点击上方「生成通知」查看预览</div>
+      <div class="copy-row">
+        <button class="btn btn-g" onclick="copyNotice()">📋 复制通知（发到班级群）</button>
+        <button class="btn" onclick="copyNoticeSummary()">🤖 复制给AI润色</button>
+        <span class="hint" style="align-self:center" id="noticeLen"></span>
+      </div>
+      <hr>
+      <div class="hint">💡 生成后会记住你填的内容，下次同类通知可直接改数字复用。历史通知见下方。</div>
+    </div>
+    <div class="card">
+      <h3>🗂️ 历史通知 <span class="tag b-blue" id="noticeCount">0 条</span></h3>
+      <div id="noticeList"></div>
+    </div>
+    <div class="card">
+      <h3>📥 我的模板 <span class="tag b-purple">粘贴你写过的通知，存成模板复用</span></h3>
+      <div class="warnbox wb-blue">
+        把你<b>以前写过的通知</b>整段粘贴到下面，起个名字保存。以后遇到同类通知，直接打开改几个数字就能发——不用从头写。<br>
+        小技巧：把日期、名额等会变的数字写成「X月X日」「XX人」，复用时替换更醒目。
+      </div>
+      <div class="row2">
+        <div><input type="text" id="myTplName" placeholder="模板名称，如：周末安全提醒"></div>
+        <div style="flex:0 0 110px"><button class="btn btn-p" onclick="saveMyTpl()">💾 保存</button></div>
+      </div>
+      <textarea id="myTplText" style="min-height:110px;margin-top:8px" placeholder="把通知原文粘贴到这里…"></textarea>
+      <hr>
+      <div id="myTplList"></div>
+    </div>
+  </div>
+
+  <!-- 文案库 -->
+  <div class="page" id="pPhrases">
+    <div class="card">
+      <h3>📥 粘贴导入 <span class="tag b-purple">把你日常写的话术贴进来</span></h3>
+      <div class="warnbox wb-blue">
+        把你自己写过的话术<b>整段复制粘贴</b>到下面，选一个归属类别，点「导入」。一行一条，工具会自动去重。<br>
+        例：你平时写日报总说「今天吃饭可香了，还把汤喝完了」——把它贴进来归到「进食/全部吃完」，以后系统就会用你自己的说法。
+      </div>
+      <div class="fl">归入哪个类别</div>
+      <div class="row2">
+        <div><select id="piField"></select></div>
+        <div><select id="piValue"></select></div>
+      </div>
+      <div class="fl">粘贴你的话术（每行一条）</div>
+      <textarea id="piText" style="min-height:120px" placeholder="今天吃饭可香了，还把汤喝完了&#10;胃口特别好，吃得又快又干净&#10;光盘啦，还主动把碗递给我"></textarea>
+      <div class="copy-row">
+        <button class="btn btn-p" onclick="pasteImport()">📥 导入</button>
+        <button class="btn" onclick="document.getElementById('piText').value=''">清空</button>
+      </div>
+      <div class="hint" style="margin-top:6px" id="piStatus"></div>
+    </div>
+    <div class="card">
+      <h3>🎨 文案措辞库 <span class="tag b-purple">可自定义 · 可导入导出 · 可联网更新</span></h3>
+      <div class="warnbox wb-blue">
+        每个枚举值都有一套<b>内置措辞</b>（每个值 <b>16 种变体</b>，点「换个开头」会整段轮换，避免千篇一律）。你可以在下面<b>自定义措辞</b>覆盖内置，自定义内容只存在你自己设备里。<br>
+        <b>迭代方式：</b>① 手动编辑 ② 导入别人分享的措辞包（JSON）③ 联网拉取最新措辞包（见下方说明）。
+      </div>
+      <div class="chips" id="phraseField" data-single="1"></div>
+      <hr>
+      <div id="phraseEdit"></div>
+    </div>
+    <div class="card">
+      <h3>📢 通知话术库 <span class="tag b-purple">开头 / 结尾 / 温馨提示 · 各 16 条</span></h3>
+      <div class="warnbox wb-blue">
+        通知的语气措辞在这里自定义。三种语气（亲切活泼 / 温和正式 / 简洁干练）各有一组开头、结尾、温馨提示，生成通知时会自动轮换，点「换一版」即可换措辞。
+      </div>
+      <div class="chips" id="ntToneChips" data-single="1">
+        <div class="chip sel">亲切活泼</div>
+        <div class="chip">温和正式</div>
+        <div class="chip">简洁干练</div>
+      </div>
+      <hr>
+      <div id="ntEdit"></div>
+      <div class="copy-row"><button class="btn" onclick="resetNoticePhrases()">♻️ 恢复内置通知话术</button></div>
+    </div>
+    <div class="card">
+      <h3>🔄 措辞包管理</h3>
+      <div class="copy-row">
+        <button class="btn" onclick="exportPhrases()">💾 导出我的措辞包</button>
+        <button class="btn" onclick="document.getElementById('phraseFile').click()">📂 导入措辞包</button>
+        <input type="file" id="phraseFile" accept=".json" style="display:none" onchange="importPhrases(event)">
+        <button class="btn" onclick="resetPhrases()">♻️ 恢复内置措辞</button>
+      </div>
+      <hr>
+      <div class="fl">联网更新措辞包（可选）</div>
+      <div class="hint" style="margin-bottom:8px">填入一个可访问的 JSON 地址（如团队共享的措辞包链接），点「拉取」即可在线更新。留空则只用本地措辞。</div>
+      <div class="row2">
+        <div><input type="text" id="phraseUrl" placeholder="https://.../phrases.json（选填）"></div>
+        <div style="flex:0 0 110px"><button class="btn btn-p" onclick="fetchPhrases()">🌐 拉取</button></div>
+      </div>
+      <div class="hint" style="margin-top:8px" id="phraseUrlStatus"></div>
+      <div class="hint" style="margin-top:6px">说明：在线拉取要求该网址支持跨域访问（CORS），个人网盘的分享链接大多不支持，会提示拉取失败。最稳妥的方式是把措辞包导出成 JSON，发给同事后用「导入措辞包」合并——效果一样，而且不受网络限制。</div>
+    </div>
+  </div>
+
+  <!-- 用法 -->
+  <div class="page" id="pHelp">
+    <div class="card">
+      <h3>❓ 怎么用（个人自用版）</h3>
+      <div class="hint" style="font-size:13px;line-height:2">
+        <b>1. 建名单</b>：在「名单」页添加孩子和家长称呼。只需做一次。支持<b>Excel 导入</b>（第一列姓名、第二列称呼，.csv 或 .xlsx），导入前可预览并选择「仅新增 / 新增并更新称呼 / 以表格为准」。<br>
+        <b>2. 录入</b>：在「录入」页逐个点选。30 个孩子约 15–20 分钟（原来手写要 105 分钟）。<b>漏记可补录</b>：顶部选日期切到前几天，录完点「回到今天」，周报会自动把补录数据算进去。<br>
+        <b>3. 生成</b>：在「日报」页一键生成，点「复制日报」→ 到微信里 Ctrl+V 粘贴发送。<br>
+        <b>4. 批量</b>：在「批量」页一次生成全部，标绿的一键复制，标红的逐条核对。<br>
+        <b>5. 周报</b>：周五在「周报」页一键聚合本周记录，自动生成每个孩子的周评；数据不足的维度会如实标注，不会编造。<br>
+        <b>6. 通知</b>：在「通知」页选模板（兴趣班报名/活动/放假/物品准备/健康提醒/家长会/<b>自定义通知</b>）。自定义通知只需填标题+正文，适合临时通知。还可切换三种语气（亲切活泼/温和正式/简洁干练），点「换一版」换措辞。历史通知自动留存可复用。<br>
+        <b>7. 文案库</b>：每个枚举值内置 <b>16 条</b>措辞变体（点「换个开头」整段轮换，不会千篇一律）。你还可以自定义措辞覆盖内置，也可以导入/导出措辞包（含通知话术），或填一个措辞包网址在线更新。
+      </div>
+      <hr>
+      <h3>🤖 想要更有文采？用这个提示词</h3>
+      <div class="hint">点「复制录入摘要」，然后粘贴到任意 AI（微信里的元宝、豆包、Kimi 都行），前面加上这段提示词：</div>
+      <div class="out" id="promptBox" style="font-size:12px;margin-top:8px">你是幼儿园带班老师的文案助手。下面是某个孩子今日的结构化录入数据。请生成一段发给家长的日报。
+
+硬性要求：
+1. 只使用我提供的数据，禁止编造任何未出现的细节。
+2. 字数 80-180 字。
+3. 禁用空泛评价（"表现很棒""继续努力"），必须有具体事例。
+4. 不做任何医学判断或诊断。
+5. 若"需家长关注"为空，不要输出该段落。
+6. 语气亲切自然，像老师本人说话，不要像模板。
+
+录入数据：</div>
+      <div class="copy-row"><button class="btn btn-sm" onclick="copyPrompt()">📋 复制提示词</button></div>
+      <hr>
+      <h3>💬 关于微信混元模型</h3>
+      <div class="warnbox wb-blue">
+        微信里的「混元」就是<b>元宝</b>（yuanbao.tencent.com，微信里搜"元宝"小程序即可）。用法：<br>
+        ① 在「日报」页点「复制录入摘要」→ ② 打开元宝小程序 → ③ 粘贴提示词 + 摘要 → ④ 元宝生成后复制回微信发送。<br>
+        <b>为什么不做成自动调用：</b>混元 API 需要腾讯云实名认证 + 开通付费服务 + 密钥，密钥放在网页里会被任何人看到（等于把账号送人），不安全也不划算。手动粘贴到元宝是免费、安全、合规的方式，每条只多花 10 秒。
+      </div>
+      <hr>
+      <h3>🔒 隐私说明</h3>
+      <div class="warnbox wb-green">
+        · 所有数据存在<b>浏览器 localStorage</b>，只在你这台设备上，不会上传任何服务器<br>
+        · 本页面默认<b>不发起任何网络请求</b>，断网也能用（唯一例外：你在「文案库」页主动填了措辞包网址并点「拉取」时，才会访问那一个网址）<br>
+        · 孩子姓名不会发送给任何 AI（除非你自己主动复制摘要去粘贴）<br>
+        · 建议每周五点一次「导出备份」，存到微信收藏或电脑
+      </div>
+      <hr>
+      <h3>⚠️ 三条红线（请务必遵守）</h3>
+      <div class="warnbox wb-red">
+        <b>R1</b> 外伤、体温、症状必须如实填写，工具不会自动补全，也不要让 AI 猜。<br>
+        <b>R2</b> 标红条目必须你自己核对后再发，不要图快。<br>
+        <b>R3</b> 投诉、矛盾、特殊儿童情况的沟通，请自己写，不要用 AI 生成的文案。
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="mask" id="mask">
+  <div class="modal">
+    <h3 id="modalTitle">批量粘贴添加</h3>
+    <div class="hint" style="margin-bottom:8px">每行一个孩子，格式：<b>姓名,家长称呼,小名</b>（小名选填，逗号可中文或英文）</div>
+    <textarea id="importText" style="min-height:140px" placeholder="张小明,小明妈妈,明明&#10;李乐乐,乐乐爸爸&#10;王朵朵,朵朵妈妈,朵朵"></textarea>
+    <div class="ops">
+      <button class="btn" style="flex:1" onclick="closeModal()">取消</button>
+      <button class="btn btn-p" style="flex:1" onclick="doImportRoster()">确认添加</button>
+    </div>
+  </div>
+</div>
+
+<!-- 删除确认 -->
+<div class="mask" id="delMask">
+  <div class="modal">
+    <h3 style="color:var(--red)">⚠️ 删除确认</h3>
+    <div class="warnbox wb-red" id="delStat"></div>
+    <div class="fl">请手动输入孩子姓名以确认删除</div>
+    <input type="text" id="delNameInput" placeholder="输入上面显示的孩子姓名" oninput="checkDelName()" autocomplete="off">
+    <div class="hint" style="margin:8px 0">这是防止误删的保护措施。输入正确后「确认删除」按钮才会亮起。删除后数据无法恢复，如需保险请先点右上角「导出备份」。</div>
+    <div class="ops">
+      <button class="btn" style="flex:1" onclick="closeDelModal()">取消</button>
+      <button class="btn btn-p" id="delConfirmBtn" style="flex:1;opacity:.45;pointer-events:none" onclick="doDeleteKid()">确认删除</button>
+    </div>
+  </div>
+</div>
+<script>
+const LS='kg_daily_v1';
+let DB=JSON.parse(localStorage.getItem(LS)||'{"kids":[],"records":{}}');
+const save=()=>localStorage.setItem(LS,JSON.stringify(DB));
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+let curDate=today();
+const key=(id)=>curDate+'_'+id;
+// 常见复姓（两字姓），用于去姓氏时判断
+const COMPOUND_SURNAMES=['欧阳','太史','端木','上官','司马','东方','独孤','南宫','万俟','闻人','夏侯','诸葛','尉迟','公羊','赫连','澹台','皇甫','宗政','濮阳','公冶','太叔','申屠','公孙','慕容','仲孙','钟离','长孙','宇文','司徒','鲜于','司空','闾丘','子车','亓官','司寇','巫马','公西','颛孙','壤驷','公良','漆雕','乐正','宰父','谷梁','拓跋','夹谷','轩辕','令狐','段干','百里','呼延','东郭','南门','羊舌','微生','公户','公玉','公仪','梁丘','公仲','公上','公门','公山','公坚','左丘','公伯','西门','公祖','第五','公乘','贯丘','公皙','南荣','东里','东宫','仲长','子书','子桑','即墨','达奚','褚师'];
+// 去掉姓氏，保留名字部分（用于无小名时的亲切称呼）
+function stripSurname(full){
+ if(!full)return '';
+ for(const s of COMPOUND_SURNAMES){if(full.startsWith(s)&&full.length>s.length)return full.slice(s.length);}
+ // 默认按单姓处理：去掉第一个字
+ return full.length>1?full.slice(1):full;
+}
+// 日报里对孩子的称呼：有小名用小名，没有则去姓氏
+function displayName(k){
+ if(k&&k.nickname&&k.nickname.trim())return k.nickname.trim();
+ return stripSurname(k?k.name:'');
+}
+let curKid=null,repKid=null,greetIdx=0;
+const NOTE_FIELDS=['attendance','energy','mood','breakfast','lunch','pick','snack','stoolCount','stoolStatus','nap','activity','social'];
+
+const GREETS=['{p}好～','{p}您好，今天的情况给您同步一下：','{p}好呀，来看看{n}今天在园里的一天：','{p}好，今日小播报来啦：','{p}好，今天想跟您聊聊{n}在园的表现：','{p}好～今天是 {d}，{n}的在园记录：','{p}好，{n}今天的一天给您汇报一下：','{p}您好呀，今天{n}的情况是这样的：','{p}好～跟您说说{n}今天在园里的事：','{p}好，今日份的小分享来啦：','{p}好呀，{n}今天的小故事给您讲讲：','{p}您好，今天的在园情况同步给您：','{p}好～今天是 {d}，来聊聊{n}：','{p}好，今天{n}过得还不错，跟您说说：','{p}您好呀，今日小记录送上：','{p}好，今天想跟您分享{n}的几个瞬间：'];
+const PH={
+energy:{
+ '非常活跃':['精神头很足，一整天都很有活力','今天活力满满，玩起来特别有劲','状态特别好，精力旺盛得很','今天特别有精神，一刻都不闲着','精力充沛，跑跑跳跳停不下来','今天精神很好，眼睛里都是光','一整天都蹦蹦跳跳的，活力十足','状态很棒，做什么都有劲头','精神饱满，户外活动跑得满头大汗','今天像个小马达，一刻不停','活力满满，连午休都想继续玩','精神特别好，笑点也低，一直在乐','全天都是满格状态','今天元气满满，玩什么都起劲','精力很旺，跑起来我们都有点跟不上','状态好得不得了，一整天都在动'],
+ '正常':['状态平稳，和平时一样','今天状态不错，平稳如常','整体状态很好，跟往常一样','精神状态正常，没什么波动','一天下来状态都挺平稳','精神还行，跟平常差不多','状态一如往常，没有起伏','今天精神稳定，节奏正常','全天状态均匀，没出现特别累','精神状况良好，按部就班','状态平稳，玩和休息都很正常','今天精力正常，玩得挺放松','整体平稳，跟平时没什么差别','精神不错，一天的节奏很顺','状态在线，该玩该睡都正常','今天状态正常，没有出现疲惫'],
+ '略蔫':['今天有点蔫蔫的，可能没睡够','今天兴致不算高，有点提不起劲','看起来有点没精神，估计昨晚睡得晚','今天稍微有点蔫，不如平时活跃','精神有点弱，玩得没平时起劲','今天状态偏低，反应慢了些','有点提不起劲，我们让他多休息了一会儿','精神不太足，中途靠着歇了会儿','今天蔫了一些，不如往常活跃','状态略低，玩得没那么大劲头','精神一般，看着有点困','今天兴致不高，可能昨晚睡得晚些','略微犯困，我们安排他多坐了会儿','精神稍弱，玩得比较安静','今天有点懒洋洋的，我们也多留意了','状态不太高，中间让他歇了两次'],
+ '明显疲惫':['今天看起来比较累，建议晚上早点休息','今天挺累的，状态有点跟不上','明显有些疲态，建议今晚早些睡','今天比较疲惫，精力不太够','精神明显不济，建议今晚早休息','今天累得比较明显，玩得没什么劲','疲态明显，中途休息了好几次','精力不足，看着很困','今天很累，我们让他安静休息了会儿','状态明显疲惫，建议今晚早点睡','累得比较厉害，活动参与不多','今天精神很差，建议今晚早点休息','疲惫明显，眼睛都有点睁不开','精力明显不够，我们减少了他的活动量','今天累坏了，建议今晚早睡','疲态较重，建议关注一下睡眠']
+},
+mood:{
+ '愉快':['心情很好，笑声不断','一整天都乐呵呵的，心情特别好','情绪很棒，笑容很多','今天心情一直不错，开开心心的','情绪特别好，走到哪都笑','今天心情美美的，笑点低得很','一直开开心心的，看着就让人欢喜','心情愉快，跟谁都能聊上几句','情绪很好，今天笑了好多次','一整天都乐呵呵的，特别开心','心情特别好，还主动逗小朋友笑','情绪愉悦，一整天都带着笑','今天心情很棒，笑声特别多','情绪很好，玩得开心玩得尽兴','心情一直在线，全天都乐呵呵','今天特别开心，笑容就没停过'],
+ '平静':['情绪平稳','心情平和，没有大起大落','情绪安稳，状态放松','今天情绪很平和','情绪稳定，没什么起伏','心情平平静静，一整天都很放松','情绪安稳，没出现波动','今天心情平和，状态很松','情绪很稳，安安静静地过了一天','心情平静，没有大的情绪变化','情绪平稳，安安静静地玩','今天情绪安宁，挺放松的','心情平和，节奏稳稳的','情绪安稳，一整天都不闹','今天情绪很平，安安静静','心情平静，没有什么起伏'],
+ '易烦躁':['今天有点容易急躁','今天情绪有点小急躁，需要多哄一会儿','偶尔会有点小烦躁','今天有点小脾气，耐心引导后能平复','今天有点容易急，我们耐心陪了一会儿','情绪有点小急躁，多哄几次就好了','偶尔会急一下，我们安抚后就平静了','今天有点小脾气，我们陪着聊了聊','有点容易烦躁，我们多给了他一些陪伴','情绪偶尔急躁，哄一哄就缓过来了','今天有点小急，我们慢慢引导他','情绪有点小波动，我们多安抚了几次','偶尔会闹点小脾气，耐心陪就好','今天容易急一些，我们一直在旁边陪着','有点小急躁，我们及时安抚后平静了','情绪偶尔急，哄一哄就能稳住'],
+ '低落':['今天情绪有点低落','今天不太开心，情绪偏低','心情有些闷闷的','今天情绪偏低，我们多陪了一会儿','情绪有点低，我们主动去陪了他','今天心情不太好，我们多关注了','情绪偏低，我们陪着他玩了一会儿','今天闷闷不乐，我们一直在旁边陪着','心情有点低，我们多给了他一些关心','情绪不太高，我们主动逗了逗他','今天不太开心，我们多陪了他一会儿','情绪低落一些，我们陪他聊了聊','心情有点闷，我们一直陪着没让他一个人','今天情绪偏低，我们特别留意了','情绪有点沉，我们多陪在他身边','今天不太开心，我们多给了些陪伴'],
+ '哭闹':['今天哭了几次，我们都及时安抚了','今天情绪波动比较大，哭过几次，我们都及时抱了抱','哭了几次，安抚后能缓过来','今天哭了两次，哄一哄就好了','今天哭了几次，我们每次都第一时间安抚','哭过几次，我们都及时抱在怀里哄了','今天哭了两次，安抚之后平静下来','情绪波动较大，哭了几次，我们一直陪着','今天哭了两次，我们都及时安抚了','哭了几次，我们都抱起来哄了哄','今天哭过几次，安抚后情绪稳定了','哭了两次，我们都及时安抚，很快就缓过来','今天情绪起伏大，哭了几次，我们都陪在身边','哭了两次，我们安抚后好了','今天哭了两次，我们都及时哄了','哭了几次，我们都第一时间安抚了']
+},
+meal:{
+ '全部吃完':['光盘啦，吃得很好','全部吃完，胃口特别好','吃得干干净净，一点没剩','这顿全吃完了，胃口很棒','光盘小能手，碗都见底了','全部吃完，还问有没有第二份','吃得特别干净，一点没剩下','这顿全吃完，胃口棒棒的','光盘啦，吃得又快又好','全部吃完，吃得特别香','一点没剩，吃得干干净净','这顿吃光了，胃口好得不得了','全部吃完，还主动收了碗','吃得很好，光盘完成','全部吃完，吃得特别开心','这顿全部吃完，胃口特别好'],
+ '吃了大半':['吃了大半，胃口不错','吃了大部分，胃口还行','吃得挺多，剩了一点点','吃了大半，胃口还可以','大部分都吃了，只剩一点','吃得挺多，胃口挺好','吃了大半，吃得挺香','大半份都吃掉了','吃得不少，胃口正常','吃了大部分，胃口正常','大半都吃完，胃口还行','吃得挺多，剩下一小部分','吃了大半，胃口挺正常','大部分吃掉了，胃口不错','吃得挺多，胃口可以','吃了大半，胃口还行'],
+ '吃了一半':['吃了一半左右','吃了一半，胃口一般','吃了大概一半','这顿吃了一半','一半吃完了，胃口普通','吃了大约一半','半份吃完，胃口一般','这顿吃了半份左右','吃了一半左右，胃口还行','吃了一半，胃口平平','一半吃掉了','这顿吃了大约一半','吃了半份，胃口还行','吃了一半上下','一半吃完了，胃口一般般','这顿吃了一半左右'],
+ '少量':['只吃了一点点','吃得很少','只吃了几口','这顿吃得不多','只吃了一点点，胃口不太好','吃得很少，只吃了两口','这顿吃得不多，胃口偏弱','只吃了几口，胃口偏弱','吃得很少，胃口不太好','这顿只吃了一点','吃了两口就停了','只吃了一小口','这顿吃得很少','只吃了几口，胃口弱','吃得不多，胃口偏弱','这顿只吃了一点点'],
+ '未进食':['今天这顿没怎么吃','这顿基本没吃','几乎没怎么进食','这顿没吃','今天这顿没吃，我们会再留意','这顿基本没吃，胃口不好','几乎没进食，我们会关注','这顿没吃，我们会持续观察','今天这顿没吃','这顿没进食，我们会留意','几乎没怎么吃，我们会关注','这顿没吃，胃口不佳','今天这顿没吃，我们会再观察','这顿基本没进食','几乎没进食，我们会留意','这顿没吃，我们会持续关注']
+},
+snack:{
+ '正常':['加餐正常','点心正常吃完了','加餐吃得不错','加餐这顿吃得挺好','点心吃完了','加餐吃得挺好','点心正常吃掉了','加餐吃得挺香','点心吃完了，加餐没问题','加餐吃得不错，很正常','点心吃得挺好','加餐正常吃完','点心吃得不错','加餐没问题，吃得挺好','点心吃完了，加餐正常','加餐吃得挺正常'],
+ '少量':['加餐只吃了一点','点心吃了一些','加餐吃得不多','加餐吃了小部分','点心吃了小半份','加餐吃得偏少','点心吃了少量','加餐吃了一点，不多','加餐只吃了一点点','点心吃了一些，不多','加餐吃得偏少一些','点心吃了小份','加餐吃得少一些','点心吃得不多','加餐吃了小半份','点心吃得偏少'],
+ '未吃':['加餐没吃','点心没吃','加餐这顿没吃','加餐没怎么吃','加餐没吃，我们留意了','点心没吃，我们会关注','加餐没吃，我们会观察','点心没吃，我们会留意','这顿加餐没吃','点心这顿没吃','加餐没进食','点心没进食','加餐没吃，我们会继续留意','点心没吃，我们会继续观察','这顿点心没吃','加餐没吃，我们会持续关注']
+},
+water:{
+ '充足':['喝水充足','水喝得很足','喝水挺多的','水分补充得很好','喝水很充足','水喝得挺多','喝水足量','水分补得很到位','水喝得很够','喝水挺足','水分补得不错','喝水很够量','水喝得挺足','喝水量很充足','水分补充得很充分','水喝得特别足'],
+ '正常':['喝水正常','喝水还行','喝水情况正常','喝水跟平时差不多','喝水量正常','喝水正常，没问题','喝水情况良好','喝水跟往常差不多','喝水量还行','喝水正常，没什么问题','喝水情况挺正常','喝水跟平时一样','喝水量正常，没问题','喝水挺正常','喝水情况不错','喝水正常，量够'],
+ '偏少':['喝水偏少','水喝得不多','喝水有点少','今天喝水不太够','喝水量偏少','水喝得不多，我们提醒了一次','喝水有点少，我们会提醒','今天喝水偏少，我们会提醒','喝水偏少一些','水喝得偏少','喝水量少了一些','今天喝水不太足','喝水偏少，我们会多提醒','水喝得不够多','喝水有点少，我们会关注','今天喝水量偏少']
+},
+stool:{
+ '正常':['排便正常','排便情况正常，没什么问题','大便正常','排便正常，没有不适','排便情况一切正常','大便正常，没有异常','排便正常，一切正常','排便情况正常，无不适','大便正常，没什么问题','排便正常，情况良好','排便情况正常，没有异常','大便正常，一切正常','排便正常，无异常','排便情况正常，没有不适','大便正常，情况正常','排便正常，没什么异常'],
+ '偏干硬':['大便有点偏干，建议多喝水多吃蔬果','排便偏干一些，可以多补充水分和蔬果','大便略干，注意多喝水','排便有点干，建议多吃蔬果多喝水','大便偏干，建议多补充水分','排便偏干，可以多吃些蔬果','大便有点干，建议多喝水','排便偏干一些，建议多吃蔬果','大便略干，建议多补充水分和蔬果','排便有点偏干，建议多喝水','大便偏干，注意多补充水分','排便偏干，建议多吃蔬果多喝水','大便有点干，建议多吃蔬果','排便偏干一些，建议多补充水分','大便略干，建议多喝水多吃蔬果','排便有点干，建议多补充水分和蔬果'],
+ '偏稀':['大便偏稀，我们会持续观察','排便有点偏稀，我们会继续留意','大便偏稀，已在观察','排便偏稀，会持续关注','大便稀一些，我们会多留意','排便不太成形，我们会观察','大便有点稀，我们会持续观察','排便偏稀一点，已记录并会留意','大便偏稀，如有变化会及时跟您说','排便有点稀，我们会继续观察','大便稀一些，我们会持续关注','排便不成形，我们会留意后续情况','大便偏稀，我们已记录，会继续观察','排便有点偏稀，回家也请留意一下','大便稀一点，我们会持续观察变化','排便偏稀，我们会关注后续排便情况'],
+ '异常':['大便情况有些异常，我们已持续观察','排便情况不太寻常，我们会持续关注','大便有点异常，已在密切观察','排便情况需要留意，我们已在观察','大便情况有些异常，我们会持续观察','排便情况不太寻常，已记录并会关注','大便有点异常，我们会密切留意','排便情况需要留意，如有变化会及时告知','大便情况有些异常，我们会持续关注','排便情况不太寻常，我们会继续观察','大便有点异常，我们已记录，会密切观察','排便情况需要留意，我们会持续观察','大便情况有些异常，建议回家后也留意一下','排便情况不太寻常，我们会持续关注变化','大便有点异常，我们会密切观察后续情况','排便情况需要留意，我们已在密切观察']
+},
+nap:{
+ '正常入睡':['午睡睡得很沉','午睡睡得很好，很安稳','午睡入睡快，睡得踏实','午睡睡得很香','午睡很快就睡着了，睡得很沉','午睡睡得安稳，一觉到天亮那种踏实','午睡入睡顺利，睡得很踏实','午睡睡得很好，小脸红扑扑的','午睡很快入睡，睡得很香很沉','午睡睡得很安稳，中途没醒','午睡入睡快，睡得很沉很踏实','午睡睡得很好，呼吸都很平稳','午睡很快就睡着了，睡得很安稳','午睡睡得踏实，睡醒精神也不错','午睡入睡顺利，睡得又沉又稳','午睡睡得很香，睡醒还伸了个懒腰'],
+ '入睡困难':['午睡翻了一会儿才睡着','午睡入睡花了点时间','午睡不太容易睡着，哄了一会儿','午睡翻来覆去了一会儿才睡','午睡翻了一会儿，我们拍了拍才睡着','午睡入睡慢了点，我们陪着哄了一会儿','午睡不太容易入睡，我们拍背哄了哄','午睡翻来覆去了一阵，后来睡着了','午睡入睡花了些时间，我们一直在旁边陪着','午睡不太容易睡着，我们轻声哄了哄','午睡翻了一会儿才慢慢睡着','午睡入睡有点慢，我们陪着他躺了一会儿','午睡翻来覆去了一会儿，我们拍拍他','午睡不太容易入睡，我们多哄了一会儿','午睡入睡花了点时间，我们一直陪着','午睡翻了一会儿，后来慢慢睡着了'],
+ '中途醒来':['午睡中途醒了一次','午睡中间醒过一回','午睡睡着后又醒了一次','午睡醒过一次，再哄又睡了','午睡中途醒了一次，我们哄了哄又睡了','午睡中间醒过一回，拍拍又睡着了','午睡醒过一次，我们陪着又哄睡着了','午睡中途醒了一次，安抚后继续睡','午睡中间醒了一回，我们拍着又睡了','午睡醒过一次，哄一哄又睡过去了','午睡中途醒来一次，我们及时安抚','午睡中间醒过，我们陪着又入睡了','午睡醒过一次，安抚后又睡着了','午睡中途醒了一回，拍拍又睡了','午睡中间醒来一次，我们哄着又睡了','午睡醒过一次，我们陪着继续睡'],
+ '未午睡':['今天中午没睡着','今天午睡没睡成','中午没能入睡','今天午休没睡','今天中午没睡着，我们陪着躺了一会儿','今天午睡没睡成，我们让他安静休息了会儿','中午没能入睡，我们安排他安静休息','今天午休没睡，我们陪着他休息了会儿','今天中午没睡着，我们多关注了他的状态','今天午睡没睡成，下午我们让他多歇了歇','中午没能入睡，我们安排他躺着休息','今天午休没睡，我们留意了他的精神','今天中午没睡着，我们陪着安静休息','今天午睡没睡成，我们让他闭眼休息了会儿','中午没能入睡，我们安排他坐着歇了歇','今天午休没睡，下午我们多留意了他的状态']
+},
+social:{
+ '主动合作':['主动和小朋友一起玩，很有合作意识','很愿意和同伴一起玩，合作得不错','主动招呼小朋友一起玩','和小朋友配合得很好，很有合作精神','主动邀请小朋友一起玩游戏','和同伴合作得很愉快，还会分工','主动找小朋友一起玩，玩得很开心','和小朋友配合默契，很有合作意识','主动和同伴一起玩，还会照顾别人','和小朋友一起玩，还会主动分享玩具','主动招呼同伴一起活动，很有领导力','和小朋友合作得很好，玩得很投入','主动找小伙伴一起玩，很有合作意识','和同伴一起玩，还会主动帮忙','主动邀请小朋友参与，玩得很开心','和小朋友配合得很好，很有团队精神'],
+ '被动跟随':['跟着小朋友一起玩','和小朋友一起活动，比较配合','能跟着同伴一起玩','和小朋友一起参与，状态平稳','跟着同伴一起玩，挺配合的','和小朋友一起活动，参与得不错','能跟着小伙伴一起玩，挺开心','和同伴一起参与，状态平稳','跟着小朋友一起玩，配合得挺好','和小朋友一起活动，玩得挺开心','能跟着同伴一起玩，挺投入','和小伙伴一起参与，状态不错','跟着小朋友一起玩，挺配合','和同伴一起活动，玩得挺开心','能跟着小伙伴一起玩，配合得不错','和小朋友一起参与，玩得挺开心'],
+ '独处':['今天更喜欢自己玩','今天偏向自己单独玩','更愿意一个人玩一会儿','今天基本自己玩','今天喜欢自己玩，玩得挺专注','更愿意一个人玩，玩得挺开心','今天偏向自己玩，玩得很专注','更喜欢自己玩一会儿，玩得挺投入','今天基本自己玩，玩得挺开心','更愿意单独玩，玩得挺专注','今天喜欢一个人玩，玩得挺投入','偏向自己玩，玩得很专注','更愿意自己玩一会儿，玩得挺开心','今天基本自己玩，玩得很投入','更喜欢单独玩，玩得挺专注','今天偏向自己玩，玩得挺开心'],
+ '有冲突':['和小朋友有点小摩擦，我们已经引导','和同伴有点小矛盾，我们及时引导了','跟小朋友有些摩擦，已安抚引导','和小朋友闹了点小别扭，已引导和好','和小朋友有点小摩擦，我们已经及时引导','和同伴闹了点小别扭，我们安抚了','跟小朋友有些摩擦，我们已经引导和好','和小朋友有点小矛盾，我们及时安抚了','和同伴有点小摩擦，我们已经引导','跟小朋友闹了点小别扭，我们安抚引导了','和小朋友有些摩擦，我们及时引导了','和同伴闹了点小矛盾，我们安抚了','跟小朋友有点小摩擦，我们引导和好了','和小朋友有点小矛盾，我们及时安抚引导','和同伴有些摩擦，我们已经引导了','跟小朋友闹了点小别扭，我们及时引导了']
+},
+perf:{
+ '主动投入':['玩得很投入','玩得特别认真投入','投入度很高','参与得特别认真','玩得特别投入，眼睛都盯着','认真投入，玩得停不下来','投入度很高，玩得很专注','参与得特别认真，玩得很开心','玩得很投入，还会主动想办法','特别认真投入，玩得很专注','投入度很高，玩得津津有味','参与得很认真，玩得特别投入','玩得很投入，还会主动尝试','认真投入，玩得特别开心','投入度很高，玩得特别专注','参与得特别认真，玩得很投入'],
+ '一般参与':['参与了活动','有参加活动','参与了，但不算特别投入','正常参与了活动','参与了活动，玩得还行','参加了，玩得中规中矩','参与了一下，玩得挺平稳','有参加活动，状态平稳','参与了活动，玩得挺安静','参加了活动，玩得还行','参与了，玩得挺放松','正常参与了活动，状态平稳','参与了活动，玩得挺自然','参加了，玩得挺平稳','参与了一下，玩得挺自然','有参加活动，玩得挺放松'],
+ '旁观':['在旁边看了一会儿','在旁边观望了一阵','看了会儿，还没加入','在旁边看了挺久','在旁边看了一会儿，看得挺认真','在旁边观望了一阵，看得挺专注','看了会儿，还没加入，看得挺仔细','在旁边看了挺久，看得挺专注','在旁边看了一会儿，看得挺仔细','在旁边观望了一阵，看得挺感兴趣','看了会儿，还没加入，看得挺入神','在旁边看了挺久，看得挺仔细','在旁边看了一会儿，看得挺入神','在旁边观望了一阵，看得挺仔细','看了会儿，还没加入，看得挺感兴趣','在旁边看了挺久，看得挺感兴趣'],
+ '拒绝参与':['今天不太想参加这个活动','今天没怎么参与这个活动','不太愿意参加','今天对这个活动兴趣不大','今天不想参加这个活动','今天没参与这个活动','不太愿意参加这个活动','今天对这个活动不太感兴趣','今天不想参加','今天没参与','不太愿意参加，我们没勉强','今天对这个活动兴趣不大，我们没勉强','今天不想参加这个活动，我们没勉强','今天没参与这个活动，我们没勉强','不太愿意参加，我们尊重了他的选择','今天对这个活动不太感兴趣，我们没勉强']
+}
+};
+function pick(arr,idx){if(!arr)return '';if(typeof arr==='string')return arr;return arr[(idx||0)%arr.length];}
+// 措辞库读取：用户自定义（DB.phrases）优先覆盖内置 PH
+function getPhrases(field){
+ const base=PH[field]||{};
+ const custom=(DB.phrases&&DB.phrases[field])||{};
+ const out={};
+ Object.keys(base).forEach(v=>{out[v]=Array.isArray(base[v])?base[v].slice():[base[v]];});
+ Object.keys(custom).forEach(v=>{if(custom[v]&&custom[v].length)out[v]=custom[v].slice();});
+ return out;
+}
+function pickPh(field,value,idx){return pick(getPhrases(field)[value],idx);}
+const RED_CHECK=(r)=>r.injury==='有'||(r.temp&&parseFloat(r.temp)>=37.3)||(r.symptom&&r.symptom.trim())||r.stoolStatus==='异常'||r.stoolStatus==='偏稀'||r.lunch==='未进食'||r.social==='有冲突'||r.mood==='哭闹'||r.attendance==='病假';
+const YEL_CHECK=(r)=>r.energy==='略蔫'||r.energy==='明显疲惫'||r.breakfast==='少量'||r.lunch==='少量'||r.stoolStatus==='偏干硬'||r.nap==='未午睡'||r.nap==='入睡困难'||r.attendance==='迟到';
+
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._tt);t._tt=setTimeout(()=>t.classList.remove('show'),1800);}
+function copyText(s,msg){
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(()=>toast(msg||'已复制')).catch(()=>fallbackCopy(s,msg));}
+ else fallbackCopy(s,msg);
+}
+function fallbackCopy(s,msg){const ta=document.createElement('textarea');ta.value=s;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast(msg||'已复制');}catch(e){toast('复制失败，请手动选择复制');}document.body.removeChild(ta);}
+
+function go(id,el){document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));document.getElementById(id).classList.add('on');document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('on'));el.classList.add('on');
+ if(id==='pInput')renderPickKid();if(id==='pReport')renderRepPick();if(id==='pBatch')renderBatch();if(id==='pRoster')renderRoster();if(id==='pWeekly')renderWeekly();if(id==='pNotice'){renderNoticeFields();renderNoticeList();renderMyTplList();}if(id==='pPhrases'){renderPasteSelectors();renderPhrasePage();}}
+
+/* ===== 名单 ===== */
+function renderRoster(){
+ const g=document.getElementById('rosterGrid');g.innerHTML='';
+ document.getElementById('rosterCount').textContent=DB.kids.length+' 人';
+ if(!DB.kids.length){g.innerHTML='<div class="empty">还没有名单。逐个添加，或点下方「批量粘贴添加」。<br>也可以点「载入示例名单」先体验。</div>';return;}
+ DB.kids.forEach(k=>{
+  const d=document.createElement('div');d.className='kid';
+  const n=kidRecDays(k.id);
+  d.innerHTML=`<div class="nm">${k.name}${k.nickname?` <span class="tag b-purple">${k.nickname}</span>`:''}</div><div class="st">${k.parent||''}</div>`
+   +(n?`<div class="rec">📅 已有 ${n} 天记录</div>`:'')
+   +`<button class="del" title="删除">✕</button>`;
+  d.querySelector('.del').onclick=(e)=>{e.stopPropagation();openDelModal(k.id);};
+  g.appendChild(d);
+ });
+}
+function kidRecDays(id){return Object.keys(DB.records).filter(k=>k.endsWith('_'+id)).length;}
+
+/* ===== 删除确认 ===== */
+let delPendingId=null;
+function openDelModal(id){
+ const k=DB.kids.find(x=>x.id===id);
+ if(!k)return;
+ delPendingId=id;
+ const n=kidRecDays(id);
+ document.getElementById('delStat').innerHTML=
+  `即将删除：<b>${k.name}</b>（${k.parent||''}）<br>`
+  +(n?`该孩子共有 <b>${n} 天的日报记录</b>，删除后<b>全部一并清除且无法恢复</b>。`
+      :`该孩子暂无日报记录。`);
+ document.getElementById('delNameInput').value='';
+ checkDelName();
+ document.getElementById('delMask').classList.add('show');
+}
+function closeDelModal(){document.getElementById('delMask').classList.remove('show');delPendingId=null;}
+function checkDelName(){
+ const k=DB.kids.find(x=>x.id===delPendingId);
+ if(!k)return;
+ const okName=document.getElementById('delNameInput').value.trim()===k.name;
+ const btn=document.getElementById('delConfirmBtn');
+ btn.style.opacity=okName?'1':'.45';
+ btn.style.pointerEvents=okName?'auto':'none';
+}
+function doDeleteKid(){
+ const k=DB.kids.find(x=>x.id===delPendingId);
+ if(!k)return;
+ if(document.getElementById('delNameInput').value.trim()!==k.name){toast('姓名不匹配，未删除');return;}
+ // 清除该孩子所有日期的记录（不只是当天）
+ Object.keys(DB.records).forEach(rk=>{if(rk.endsWith('_'+k.id))delete DB.records[rk];});
+ DB.kids=DB.kids.filter(x=>x.id!==k.id);
+ if(curKid===k.id)curKid=null;
+ if(repKid===k.id){repKid=null;const rb=document.getElementById('repBody');if(rb)rb.style.display='none';}
+ save();closeDelModal();renderRoster();
+ toast('已删除 '+k.name);
+}
+function addKid(){
+ const n=document.getElementById('newName').value.trim(),p=document.getElementById('newParent').value.trim(),nk=document.getElementById('newNick').value.trim();
+ if(!n){toast('请填写姓名');return;}
+ if(DB.kids.some(k=>k.name===n)){toast('已存在同名孩子');return;}
+ const kid={id:'C'+Date.now().toString(36)+Math.floor(Math.random()*99),name:n,parent:p||n+'妈妈'};
+ if(nk)kid.nickname=nk;
+ DB.kids.push(kid);
+ save();document.getElementById('newName').value='';document.getElementById('newParent').value='';document.getElementById('newNick').value='';renderRoster();toast('已添加 '+n+(nk?'（小名：'+nk+'）':''));
+}
+function openImportRoster(){document.getElementById('mask').classList.add('show');}
+function closeModal(){document.getElementById('mask').classList.remove('show');}
+function doImportRoster(){
+ const lines=document.getElementById('importText').value.split('\n').map(l=>l.trim()).filter(Boolean);let n=0;
+ lines.forEach(l=>{const parts=l.split(/[,，]/).map(s=>s.trim());const nm=parts[0];if(!nm)return;
+  if(DB.kids.some(k=>k.name===nm))return;
+  const kid={id:'C'+Date.now().toString(36)+Math.floor(Math.random()*99),name:nm,parent:parts[1]||nm+'妈妈'};
+  if(parts[2])kid.nickname=parts[2];
+  DB.kids.push(kid);n++;});
+ save();document.getElementById('importText').value='';closeModal();renderRoster();toast('已添加 '+n+' 人');
+}
+/* ===== Excel / CSV 名单导入 ===== */
+let rosterPending=null,rosterMode='仅新增';
+
+// 简易 CSV/TSV 解析（支持引号包裹的字段与逗号）
+function parseDelimited(text){
+ const delim=(text.indexOf('\t')>=0&&text.split('\t').length>=text.split(',').length)?'\t':',';
+ const rows=[];let cur=[],field='',inQ=false;
+ for(let i=0;i<text.length;i++){
+  const ch=text[i];
+  if(inQ){
+   if(ch==='"'){if(text[i+1]==='"'){field+='"';i++;}else inQ=false;}
+   else field+=ch;
+  }else{
+   if(ch==='"')inQ=true;
+   else if(ch===delim){cur.push(field);field='';}
+   else if(ch==='\n'){cur.push(field);rows.push(cur);cur=[];field='';}
+   else if(ch==='\r'){}
+   else field+=ch;
+  }
+ }
+ cur.push(field);rows.push(cur);
+ return rows.map(r=>r.map(s=>(s||'').trim())).filter(r=>r.some(s=>s));
+}
+
+// ZIP 中央目录解析
+function zipEntries(buf){
+ const u8=new Uint8Array(buf);const dv=new DataView(buf);
+ let eocd=-1;
+ for(let i=u8.length-22;i>=Math.max(0,u8.length-66000);i--){
+  if(dv.getUint32(i,true)===0x06054b50){eocd=i;break;}
+ }
+ if(eocd<0)throw new Error('不是有效的 xlsx 文件（未找到 ZIP 目录）');
+ const count=dv.getUint16(eocd+10,true);
+ let off=dv.getUint32(eocd+16,true);
+ const out=[];
+ for(let n=0;n<count;n++){
+  if(dv.getUint32(off,true)!==0x02014b50)break;
+  const method=dv.getUint16(off+10,true);
+  const compSize=dv.getUint32(off+20,true);
+  const nameLen=dv.getUint16(off+28,true);
+  const extraLen=dv.getUint16(off+30,true);
+  const cmtLen=dv.getUint16(off+32,true);
+  const lho=dv.getUint32(off+42,true);
+  let name='';for(let j=0;j<nameLen;j++)name+=String.fromCharCode(u8[off+46+j]);
+  out.push({name,method,compSize,lho});
+  off+=46+nameLen+extraLen+cmtLen;
+ }
+ return out;
+}
+
+// 从本地头取数据起点，并用 DecompressionStream 解压
+async function zipRead(buf,entry){
+ const u8=new Uint8Array(buf);const dv=new DataView(buf);
+ const lho=entry.lho;
+ if(dv.getUint32(lho,true)!==0x04034b50)throw new Error('ZIP 本地头损坏');
+ const nameLen=dv.getUint16(lho+26,true),extraLen=dv.getUint16(lho+28,true);
+ const start=lho+30+nameLen+extraLen;
+ const data=u8.subarray(start,start+entry.compSize);
+ if(entry.method===0)return new TextDecoder('utf-8').decode(data);
+ if(entry.method!==8)throw new Error('不支持的压缩方式');
+ const ds=new DecompressionStream('deflate-raw');
+ const blob=new Blob([data]).stream().pipeThrough(ds);
+ return await new Response(blob).text();
+}
+
+// 读取 xlsx 第一个工作表 -> 二维数组
+async function parseXlsx(buf){
+ const entries=zipEntries(buf);
+ // 共享字符串表（可能存在）
+ let shared=[];
+ const ss=entries.find(e=>/sharedStrings\.xml$/i.test(e.name));
+ if(ss){
+  const xml=await zipRead(buf,ss);
+  const doc=new DOMParser().parseFromString(xml,'application/xml');
+  [...doc.getElementsByTagName('si')].forEach(si=>{
+   let t='';
+   [...si.getElementsByTagName('t')].forEach(n=>t+=n.textContent);
+   shared.push(t);
+  });
+ }
+ const sheet=entries.find(e=>/worksheets\/sheet\d+\.xml$/i.test(e.name))
+            ||entries.find(e=>/worksheets\/[^\/]+\.xml$/i.test(e.name));
+ if(!sheet)throw new Error('xlsx 里没找到工作表');
+ const sxml=await zipRead(buf,sheet);
+ const sdoc=new DOMParser().parseFromString(sxml,'application/xml');
+ const rows=[];
+ [...sdoc.getElementsByTagName('row')].forEach(row=>{
+  const arr=[];
+  [...row.getElementsByTagName('c')].forEach(c=>{
+   const type=c.getAttribute('t');
+   const vNode=c.getElementsByTagName('v')[0];
+   const isNode=c.getElementsByTagName('is')[0];
+   let val='';
+   if(type==='inlineStr'&&isNode){[...isNode.getElementsByTagName('t')].forEach(n=>val+=n.textContent);}
+   else if(vNode){
+    val=vNode.textContent;
+    if(type==='s')val=shared[parseInt(val,10)]||'';
+   }
+   arr.push((val||'').trim());
+  });
+  rows.push(arr);
+ });
+ return rows.filter(r=>r.some(s=>s));
+}
+
+// 跳过表头行：若首行含"姓名/名字/幼儿"等字样则视为表头
+function stripHeader(rows){
+ if(!rows.length)return rows;
+ const h=(rows[0][0]||'')+(rows[0][1]||'');
+ if(/姓名|名字|幼儿|儿童|家长|称呼|序号|学号|班级/.test(h))return rows.slice(1);
+ return rows;
+}
+
+function importRosterFile(e){
+ const f=e.target.files[0];
+ if(!f)return;
+ const isXlsx=/\.(xlsx|xls)$/i.test(f.name);
+ if(isXlsx&&typeof DecompressionStream==='undefined'){
+  toast('当前浏览器不支持 xlsx 解析，请改用 csv 或用「批量粘贴」');
+  e.target.value='';return;
+ }
+ const rd=new FileReader();
+ rd.onload=async()=>{
+  try{
+   let rows;
+   if(isXlsx){rows=await parseXlsx(rd.result);}
+   else{rows=parseDelimited(rd.result);}
+   rows=stripHeader(rows);
+   if(!rows.length){toast('表格是空的');e.target.value='';return;}
+   rosterPending=rows.map(r=>({name:(r[0]||'').trim(),parent:(r[1]||'').trim(),nickname:(r[2]||'').trim()})).filter(x=>x.name);
+   if(!rosterPending.length){toast('表格里第一列没读到姓名');e.target.value='';return;}
+   openRosterModal();
+  }catch(err){toast('读取失败：'+err.message);}
+  e.target.value='';
+ };
+ if(isXlsx)rd.readAsArrayBuffer(f);else rd.readAsText(f,'UTF-8');
+}
+
+function openRosterModal(){
+ document.getElementById('rosterMask').classList.add('show');
+ document.getElementById('rosterModeChips').querySelectorAll('.chip').forEach(c=>{
+  c.onclick=()=>{
+   c.parentNode.querySelectorAll('.chip').forEach(x=>x.classList.remove('sel'));
+   c.classList.add('sel');rosterMode=c.textContent.trim();renderRosterPreview();
+  };
+ });
+ renderRosterPreview();
+}
+function closeRosterModal(){document.getElementById('rosterMask').classList.remove('show');}
+
+function renderRosterPreview(){
+ const box=document.getElementById('rosterPreview');
+ const stat=document.getElementById('rosterStat');
+ if(!rosterPending){box.innerHTML='';return;}
+ const cur={};DB.kids.forEach(k=>cur[k.name]=k);
+ let add=0,upd=0,same=0;
+ const del=[];
+ rosterPending.forEach(x=>{
+  if(!cur[x.name])add++;
+  else if(x.parent&&cur[x.name].parent!==x.parent)upd++;
+  else same++;
+ });
+ if(rosterMode==='以表格为准'){
+  const inSheet={};rosterPending.forEach(x=>inSheet[x.name]=1);
+  DB.kids.forEach(k=>{if(!inSheet[k.name])del.push(k.name);});
+ }
+ stat.innerHTML=`表格共 <b>${rosterPending.length}</b> 人；现有名单 <b>${DB.kids.length}</b> 人。<br>
+  新增 <b>${add}</b> 人${rosterMode!=='仅新增'?`，更新称呼 <b>${upd}</b> 人`:''}${rosterMode==='以表格为准'?`，<b style="color:var(--red)">将移除 ${del.length} 人</b>`:''}，无变化 ${same} 人。`;
+ box.innerHTML=rosterPending.slice(0,60).map(x=>{
+  const ex=cur[x.name];
+  const tag=!ex?'<span class="tag b-green">新增</span>'
+           :(ex.parent!==x.parent&&x.parent?'<span class="tag b-yellow">更新称呼</span>'
+           :'<span class="tag b-blue">已存在</span>');
+  return `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line);font-size:13px">
+    <span><b>${x.name}</b>${x.nickname?` <span class="tag b-purple">${x.nickname}</span>`:''} <span style="color:var(--sub)">${x.parent||ex&&ex.parent||''}</span></span>${tag}</div>`;
+ }).join('')+(rosterPending.length>60?`<div class="hint">… 另有 ${rosterPending.length-60} 人未显示</div>`:'')
+ +(rosterMode==='以表格为准'&&del.length?`<div class="hint" style="color:var(--red);margin-top:8px">将移除：${del.join('、')}</div>`:'');
+}
+
+function applyRosterImport(){
+ if(!rosterPending){closeRosterModal();return;}
+ const cur={};DB.kids.forEach(k=>cur[k.name]=k);
+ let add=0,upd=0,nkSet=0;
+ rosterPending.forEach(x=>{
+  if(!cur[x.name]){
+   const kid={id:'C'+Date.now().toString(36)+Math.floor(Math.random()*999),name:x.name,parent:x.parent||x.name+'妈妈'};
+   if(x.nickname){kid.nickname=x.nickname;nkSet++;}
+   DB.kids.push(kid);
+   add++;
+  }else if(rosterMode!=='仅新增'){
+   let ch=false;
+   if(x.parent&&cur[x.name].parent!==x.parent){cur[x.name].parent=x.parent;ch=true;}
+   if(x.nickname&&cur[x.name].nickname!==x.nickname){cur[x.name].nickname=x.nickname;nkSet++;ch=true;}
+   if(ch)upd++;
+  }
+ });
+ let rm=0;
+ if(rosterMode==='以表格为准'){
+  const inSheet={};rosterPending.forEach(x=>inSheet[x.name]=1);
+  const gone=DB.kids.filter(k=>!inSheet[k.name]);
+  gone.forEach(k=>{Object.keys(DB.records).forEach(rk=>{if(rk.endsWith('_'+k.id))delete DB.records[rk];});});
+  DB.kids=DB.kids.filter(k=>inSheet[k.name]);
+  rm=gone.length;
+ }
+ save();closeRosterModal();renderRoster();rosterPending=null;
+ toast(`导入完成：新增 ${add} 人${upd?`，更新 ${upd} 人`:''}${nkSet?`，设置小名 ${nkSet} 人`:''}${rm?`，移除 ${rm} 人`:''}`);
+}
+
+function loadDemo(){
+ const demo=[['张小明','小明妈妈','明明'],['李乐乐','乐乐妈妈','乐乐'],['王朵朵','朵朵妈妈','朵朵'],['陈思远','思远妈妈','思思'],['赵一诺','一诺妈妈',''],['孙嘉怡','嘉怡妈妈',''],['周雨桐','雨桐妈妈','桐桐']];
+ demo.forEach(([n,p,nk])=>{if(!DB.kids.some(k=>k.name===n)){const kid={id:'C'+Math.random().toString(36).slice(2,8),name:n,parent:p};if(nk)kid.nickname=nk;DB.kids.push(kid);}});
+ save();renderRoster();toast('示例名单已载入');
+}
+
+/* ===== 录入 ===== */
+function renderPickKid(){
+ const g=document.getElementById('pickKid');g.innerHTML='';
+ document.getElementById('dateLabel').textContent=curDate;
+ const dp=document.getElementById('datePick');if(dp&&dp.value!==curDate)dp.value=curDate;
+ const hint=document.getElementById('dateHint');
+ if(hint){
+  const n=DB.kids.filter(k=>DB.records[key(k.id)]).length;
+  if(curDate===today())hint.textContent='今天是 '+curDate+'，已录入 '+n+' / '+DB.kids.length+' 人';
+  else hint.innerHTML='⚠️ 当前在补录 <b>'+curDate+'</b>（非今天），已录入 '+n+' / '+DB.kids.length+' 人。录入内容会存到该日期，周报会自动纳入。';
+ }
+ if(!DB.kids.length){g.innerHTML='<div class="empty">请先在「名单」页添加孩子</div>';return;}
+ DB.kids.forEach(k=>{
+  const rec=DB.records[key(k.id)];
+  const d=document.createElement('div');d.className='kid'+(rec?' done':'')+(curKid===k.id?' on':'');
+  d.innerHTML=`<div class="nm">${k.name}${k.nickname?' <span class="tag b-purple">'+k.nickname+'</span>':''}</div><div class="st">${rec?'已录入':'未录入'}</div>`;
+  d.onclick=()=>{curKid=k.id;renderPickKid();openForm(k);};
+  g.appendChild(d);
+ });
+}
+function changeDate(){
+ const v=document.getElementById('datePick').value;
+ if(!v)return;
+ curDate=v;curKid=null;
+ document.getElementById('inputForm').style.display='none';
+ renderPickKid();
+ toast(curDate===today()?'已切回今天':'已切换到 '+curDate);
+}
+function backToday(){curDate=today();curKid=null;repKid=null;document.getElementById('inputForm').style.display='none';document.getElementById('repBody').style.display='none';renderPickKid();renderRepPick();renderBatch();toast('已回到今天');}
+function openForm(k){
+ document.getElementById('inputForm').style.display='block';
+ document.getElementById('curName').textContent=k.name+(k.nickname?'（'+k.nickname+'）':'');
+ document.getElementById('curParent').textContent=k.parent;
+ const rec=DB.records[key(k.id)]||{};
+ document.querySelectorAll('#inputForm .chips').forEach(g=>{
+  const f=g.dataset.f;g.querySelectorAll('.chip').forEach(c=>{
+   c.classList.remove('sel','ok','warn','danger');
+   const v=rec[f];
+   if(Array.isArray(v)){if(v.includes(c.textContent.trim()))c.classList.add('sel');}
+   else if(v===c.textContent.trim())c.classList.add('sel');
+  });
+ });
+ document.getElementById('napStart').value=rec.napStart||'';
+ document.getElementById('napEnd').value=rec.napEnd||'';
+ document.getElementById('injuryText').value=rec.injuryText||'';
+ document.getElementById('temp').value=rec.temp||'';
+ document.getElementById('symptom').value=rec.symptom||'';
+ document.getElementById('highlight').value=rec.highlight||'';
+ document.getElementById('attention').value=rec.attention||'';
+ NOTE_FIELDS.forEach(f=>{const el=document.getElementById('note_'+f);if(el)el.value=(rec['note_'+f])||'';});
+ document.getElementById('injuryBox').style.display=(rec.injury==='有')?'block':'none';
+ document.getElementById('inputForm').scrollIntoView({behavior:'smooth'});
+}
+document.querySelectorAll('#inputForm .chips').forEach(g=>{
+ const single=g.dataset.single==='1';
+ g.querySelectorAll('.chip').forEach(c=>{
+  c.onclick=()=>{
+   if(single){g.querySelectorAll('.chip').forEach(x=>x.classList.remove('sel','ok','warn','danger'));c.classList.add('sel');}
+   else{c.classList.toggle('sel');}
+   if(single){const t=c.textContent.trim();
+    if(['非常活跃','愉快','全部吃完','1次','正常','主动合作','正常入睡','无','吃了大半'].includes(t))c.classList.add('ok');
+    if(['略蔫','易烦躁','吃了一半','少量','偏干硬','偏稀','入睡困难','中途醒来','未午睡','低落','迟到'].includes(t))c.classList.add('warn');
+    if(['明显疲惫','哭闹','未进食','异常','有冲突','有','3次+'].includes(t))c.classList.add('danger');}
+   if(g.dataset.f==='injury')document.getElementById('injuryBox').style.display=(c.textContent.trim()==='有')?'block':'none';
+  };
+ });
+});
+function collectForm(){
+ const r={};
+ document.querySelectorAll('#inputForm .chips').forEach(g=>{
+  const f=g.dataset.f,vals=[...g.querySelectorAll('.chip.sel')].map(c=>c.textContent.trim());
+  r[f]=g.dataset.single==='1'?(vals[0]||''):vals;
+ });
+ r.napStart=document.getElementById('napStart').value.trim();
+ r.napEnd=document.getElementById('napEnd').value.trim();
+ r.injuryText=document.getElementById('injuryText').value.trim();
+ r.temp=document.getElementById('temp').value.trim();
+ r.symptom=document.getElementById('symptom').value.trim();
+ r.highlight=document.getElementById('highlight').value.trim();
+ r.attention=document.getElementById('attention').value.trim();
+ // 各维度补充说明栏（note_*）
+ NOTE_FIELDS.forEach(f=>{const el=document.getElementById('note_'+f);r['note_'+f]=el?el.value.trim():'';});
+ r.notes={};NOTE_FIELDS.forEach(f=>{if(r['note_'+f])r.notes[f]=r['note_'+f];});
+ return r;
+}
+function saveKid(){
+ if(!curKid){toast('请先选择孩子');return;}
+ const r=collectForm();
+ if(r.injury==='有'&&!r.injuryText){toast('⚠️ 有外伤必须填写部位与处置');return;}
+ if(r.temp&&parseFloat(r.temp)>=37.3&&!r.symptom&&!r.injuryText){toast('⚠️ 体温≥37.3℃，请补充症状或处置说明');return;}
+ DB.records[key(curKid)]=r;save();renderPickKid();toast('✅ 已保存，可到「日报」页生成');
+}
+function clearForm(){
+ document.querySelectorAll('#inputForm .chips').forEach(g=>g.querySelectorAll('.chip').forEach(c=>c.classList.remove('sel','ok','warn','danger')));
+ ['napStart','napEnd','injuryText','temp','symptom','highlight','attention'].forEach(id=>document.getElementById(id).value='');
+ NOTE_FIELDS.forEach(f=>{const el=document.getElementById('note_'+f);if(el)el.value='';});
+ document.getElementById('injuryBox').style.display='none';
+ toast('已清空');
+}
+
+/* ===== 日报生成 ===== */
+function napMinutes(r){
+ if(!r.napStart||!r.napEnd)return null;
+ const p=(s)=>{const m=s.match(/(\d{1,2})[:：](\d{2})/);return m?parseInt(m[1])*60+parseInt(m[2]):null;};
+ const a=p(r.napStart),b=p(r.napEnd);return(a&&b&&b>a)?b-a:null;
+}
+function generate(k,r,gIdx){
+ const dn=displayName(k);
+ const g=GREETS[gIdx%GREETS.length].replace('{p}',k.parent).replace('{n}',dn).replace('{d}',today().slice(5).replace('-','月')+'日');
+ const nt=(f)=>r['note_'+f]?`（${r['note_'+f]}）`:'';
+ let lines=[g,''];
+ const ep=pickPh('energy',r.energy,gIdx);
+ lines.push(`${dn}${ep.startsWith('今天')?'':'今天'}${ep}。${pickPh('mood',r.mood,gIdx)}。${nt('energy')}${nt('mood')}`);
+ let meal=`吃饭方面，早餐${pickPh('meal',r.breakfast,gIdx)}${nt('breakfast')}，午餐${pickPh('meal',r.lunch,gIdx)}${nt('lunch')}`;
+ const picks=(r.pick||[]).filter(x=>x!=='无');
+ if(picks.length)meal+=`（${picks.join('、')}剩了些${nt('pick')}）`;
+ meal+=`。${pickPh('snack',r.snack,gIdx)}${nt('snack')}。`;
+ lines.push(meal);
+ const sp=pickPh('stool',r.stoolStatus,gIdx);
+ // 短语自带「排便/大便」主语时去掉，避免「排便1次，排便正常」这类重复
+ const spClean=sp.replace(/^(排便|大便)/,'');
+ let stool=`排便${r.stoolCount||''}${nt('stoolCount')}，${spClean}${nt('stoolStatus')}。`;
+ lines.push(stool);
+ const np=pickPh('nap',r.nap,gIdx);
+ let nap=`${(/^(午睡|今天|中午)/.test(np))?'':'午睡'}${np}${nt('nap')}`;
+ const nm=napMinutes(r);
+ if(r.napStart&&r.napEnd)nap+=`（${r.napStart}–${r.napEnd}`+(nm?`，${Math.floor(nm/60)}小时${nm%60}分`:'')+`）`;
+ nap+='。';
+ lines.push(nap);
+ let act='';
+ const acts=(r.activity||[]);
+ if(acts.length)act+=`活动上玩了${acts.join('、')}${nt('activity')}。`;
+ act+=`社交方面${pickPh('social',r.social,gIdx)}${nt('social')}。`;
+ lines.push(act);
+ if(r.highlight)lines.push(`今天的小亮点：${r.highlight} 😊`);
+ if(r.injury==='有'){
+  lines.push('');lines.push(`⚠️ 身体情况需要同步：${r.injuryText}`);
+ }else if(r.temp||r.symptom){
+  let h='身体情况：';
+  if(r.temp)h+=`体温 ${r.temp}℃`;
+  if(r.symptom)h+=(r.temp?'，':'')+`有${r.symptom}`;
+  h+='，我们会持续观察。';
+  lines.push(h);
+ }else{
+  lines.push('身体情况一切正常，没有不适。');
+ }
+ if(r.attention){lines.push('');lines.push(`小提示：${r.attention}`);}
+ lines.push('');lines.push('—— 老师');
+ return lines.join('\n');
+}
+function levelOf(r){return RED_CHECK(r)?'red':(YEL_CHECK(r)?'yellow':'green');}
+function renderRepPick(){
+ const g=document.getElementById('repPick');g.innerHTML='';
+ const dh=document.getElementById('repDateHint');
+ if(dh)dh.innerHTML=curDate===today()?'当前查看：<b>'+curDate+'（今天）</b>'
+  :'⚠️ 当前查看：<b>'+curDate+'</b>（非今天）· <a href="javascript:backToday()" style="color:var(--brand)">切回今天</a>';
+ if(!DB.kids.length){g.innerHTML='<div class="empty">请先在「名单」页添加孩子</div>';return;}
+ DB.kids.forEach(k=>{
+  const rec=DB.records[key(k.id)];
+  const d=document.createElement('div');d.className='kid'+(rec?' done':'')+(repKid===k.id?' on':'');
+  d.innerHTML=`<div class="nm">${k.name}${k.nickname?' <span class="tag b-purple">'+k.nickname+'</span>':''}</div><div class="st">${rec?levelOf(rec)==='red'?'🔴 已录·标红':levelOf(rec)==='yellow'?'🟡 已录·标黄':'🟢 已录':'未录入'}</div>`;
+  d.onclick=()=>{if(!rec){toast('该孩子今日还未录入');return;}repKid=k.id;greetIdx=0;renderRepPick();showReport(k,rec);};
+  g.appendChild(d);
+ });
+}
+function showReport(k,r){
+ document.getElementById('repName').textContent=k.name+(k.nickname?'（'+k.nickname+'）':'');
+ document.getElementById('repBody').style.display='block';
+ const lv=levelOf(r);
+ const warn=document.getElementById('repWarn');
+ if(lv==='red')warn.innerHTML='<div class="warnbox wb-red">🔴 <b>此条涉及红线事项（外伤/发热/冲突/异常）。</b>请逐字核对后再复制发送，禁止图快。</div>';
+ else if(lv==='yellow')warn.innerHTML='<div class="warnbox wb-yellow">🟡 此条有需关注项（精神略蔫/进食偏少/午睡不佳等），建议发送前再看一眼。</div>';
+ else warn.innerHTML='';
+ const text=generate(k,r,greetIdx);
+ const box=document.getElementById('repText');
+ box.textContent=text;box.className='out'+(lv==='red'?' red':lv==='yellow'?' yellow':'');
+ document.getElementById('repLen').textContent=text.replace(/\n/g,'').length+' 字';
+ document.getElementById('markSent').style.display=r.sent?'none':'block';
+}
+function regenerate(){if(!repKid)return;greetIdx++;const k=DB.kids.find(x=>x.id===repKid);showReport(k,DB.records[key(repKid)]);toast('已换开头');}
+function copyRep(){if(!repKid)return;const k=DB.kids.find(x=>x.id===repKid);copyText(generate(k,DB.records[key(repKid)],greetIdx),'已复制，去微信粘贴发送吧');}
+function markSent(){if(!repKid)return;DB.records[key(repKid)].sent=true;save();document.getElementById('markSent').style.display='none';toast('已标记发送');}
+function copySummary(){
+ if(!repKid){toast('请先选择孩子');return;}
+ const k=DB.kids.find(x=>x.id===repKid);const r=DB.records[key(repKid)];
+ const s=JSON.stringify({孩子:k.name,日期:today(),...r},null,1);
+ copyText(s,'已复制录入摘要，粘贴给 AI 即可');
+}
+
+/* ===== 批量 ===== */
+let batchFilter='all';
+function renderBatch(){
+ const list=document.getElementById('batchList');list.innerHTML='';
+ const bh=document.getElementById('batchDateHint');
+ if(bh)bh.innerHTML=curDate===today()?'当前批量范围：<b>'+curDate+'（今天）</b>'
+  :'⚠️ 当前批量范围：<b>'+curDate+'</b>（非今天）· <a href="javascript:backToday()" style="color:var(--brand)">切回今天</a>';
+ const items=DB.kids.map(k=>({k,r:DB.records[key(k.id)]})).filter(x=>x.r);
+ document.getElementById('batchCount').textContent=items.length+' 条';
+ const order={red:0,yellow:1,green:2};
+ items.sort((a,b)=>order[levelOf(a.r)]-order[levelOf(b.r)]);
+ // 文案轮换索引按全量排序位置固定，筛选时措辞不会跳变
+ items.forEach((x,i)=>{x.gi=i;});
+ const red=items.filter(x=>levelOf(x.r)==='red').length,yel=items.filter(x=>levelOf(x.r)==='yellow').length,grn=items.length-red-yel;
+ const noRec=DB.kids.length-items.length;
+ const CATS=[['red',red,'标红·逐条核对','var(--red)'],['yellow',yel,'标黄·建议看一眼','var(--yellow)'],['green',grn,'标绿·可批量','var(--green)'],['none',noRec,'未录入','var(--sub)']];
+ const stat=document.getElementById('batchStat');
+ stat.innerHTML=CATS.map(([id,n,lb,color])=>`
+  <div class="s${batchFilter===id?' sel':''}" onclick="setBatchFilter('${id}')">
+   <div class="n" style="color:${color}">${n}</div><div class="l">${lb}</div></div>`).join('');
+ // 「未录入」分类：列出还没录入的孩子，方便去补录
+ if(batchFilter==='none'){
+  const miss=DB.kids.filter(k=>!DB.records[key(k.id)]);
+  if(!miss.length){list.innerHTML='<div class="empty">全部孩子都已录入 ✅</div>';return;}
+  list.innerHTML=`<div class="hint" style="margin-bottom:8px">还有 <b>${miss.length}</b> 个孩子未录入（${curDate}）。点「去录入」可直接补录。</div>`;
+  miss.forEach(k=>{
+   const d=document.createElement('div');d.className='batch-item';
+   d.innerHTML=`<div class="hd"><span class="nm">⚪ ${k.name}${k.nickname?' <span class="tag b-purple">'+k.nickname+'</span>':''}</span><span class="tag b-blue">${k.parent}</span></div>
+    <div class="ops"><button class="btn btn-sm btn-p" onclick="jumpEdit('${k.id}')">✏️ 去录入</button></div>`;
+   list.appendChild(d);
+  });
+  return;
+ }
+ if(!items.length){list.innerHTML='<div class="empty">今天还没有录入记录。去「录入」页点选吧。</div>';return;}
+ const shown=batchFilter==='all'?items:items.filter(x=>levelOf(x.r)===batchFilter);
+ if(!shown.length){
+  const nm={red:'标红',yellow:'标黄',green:'标绿'}[batchFilter];
+  list.innerHTML=`<div class="empty">当前没有${nm}条目 ✅</div>`;return;
+ }
+ if(batchFilter!=='all'){
+  const tip={red:'🔒 标红条目涉及外伤/发热/冲突/异常，<b>禁止批量发送</b>，请逐条核对后单独复制。',yellow:'🟡 这些条目有需要关注的地方，发送前建议再看一眼。',green:'🟢 这些条目可以批量复制发送。'}[batchFilter];
+  list.innerHTML=`<div class="hint" style="margin-bottom:8px">${tip} 当前显示 <b>${shown.length}</b> 条 · <a href="javascript:setBatchFilter('all')" style="color:var(--brand)">看全部</a></div>`;
+ }
+ shown.forEach(({k,r,gi})=>{
+  const lv=levelOf(r);
+  const d=document.createElement('div');d.className='batch-item '+lv;
+  const ic=lv==='red'?'🔴':lv==='yellow'?'🟡':'🟢';
+  d.innerHTML=`<div class="hd"><span class="nm">${ic} ${k.name}${k.nickname?' <span class="tag b-purple">'+k.nickname+'</span>':''}</span><span class="tag b-blue">${k.parent}</span>${r.sent?'<span class="tag b-green">已发送</span>':''}</div>
+   <div class="txt">${generate(k,r,gi).replace(/\n/g,'<br>')}</div>
+   <div class="ops">
+     <button class="btn btn-sm btn-g" onclick="copyOne('${k.id}',${gi})">📋 复制这条</button>
+     <button class="btn btn-sm" onclick="jumpEdit('${k.id}')">✏️ 去修改录入</button>
+   </div>`;
+  list.appendChild(d);
+ });
+}
+function setBatchFilter(f){
+ batchFilter=(batchFilter===f)?'all':f;
+ renderBatch();
+ const nm={all:'全部',red:'标红',yellow:'标黄',green:'标绿',none:'未录入'}[batchFilter];
+ toast(batchFilter==='all'?'显示全部':('只看'+nm));
+}
+function copyOne(id,gi){const k=DB.kids.find(x=>x.id===id);copyText(generate(k,DB.records[key(id)],gi),'已复制 '+k.name+' 的日报');}
+function jumpEdit(id){curKid=id;const btns=document.querySelectorAll('.tabs button');go('pInput',btns[1]);const k=DB.kids.find(x=>x.id===id);openForm(k);}
+function copyAllGreen(){
+ const items=DB.kids.map(k=>({k,r:DB.records[key(k.id)]})).filter(x=>x.r&&levelOf(x.r)==='green');
+ if(!items.length){toast('没有标绿条目');return;}
+ const txt=items.map(({k,r},i)=>generate(k,r,i)).join('\n\n————————————\n\n');
+ copyText(txt,'已复制 '+items.length+' 条标绿日报');
+}
+function copyAll(){
+ const items=DB.kids.map(k=>({k,r:DB.records[key(k.id)]})).filter(x=>x.r);
+ if(!items.length){toast('没有记录');return;}
+ const txt=items.map(({k,r},i)=>generate(k,r,i)).join('\n\n————————————\n\n');
+ copyText(txt,'已复制全部 '+items.length+' 条（标红请自行核对）');
+}
+
+/* ===== 备份 ===== */
+function exportData(){
+ const blob=new Blob([JSON.stringify(DB,null,1)],{type:'application/json'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='日报助手备份_'+today()+'.json';a.click();
+ toast('已导出备份文件');
+}
+function importData(e){
+ const f=e.target.files[0];if(!f)return;
+ const rd=new FileReader();
+ rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!d.kids)throw 0;DB=d;save();renderRoster();toast('导入成功：'+DB.kids.length+' 人');}catch(err){toast('文件格式不对');}};
+ rd.readAsText(f);e.target.value='';
+}
+function copyPrompt(){copyText(document.getElementById('promptBox').textContent,'提示词已复制');}
+
+/* ===== 周报 ===== */
+let curWeek=null,weekKid=null,allWeeklyCache=[];
+function fmtD(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function mondayOf(ds){const d=new Date(ds+'T00:00:00');const day=(d.getDay()+6)%7;d.setDate(d.getDate()-day);return d;}
+function weekDates(mon){const d=new Date(mon+'T00:00:00');const arr=[];for(let i=0;i<7;i++){arr.push(fmtD(d));d.setDate(d.getDate()+1);}return arr;}
+function getWeeks(){const set=new Set();Object.keys(DB.records).forEach(k=>set.add(fmtD(mondayOf(k.split('_')[0]))));set.add(fmtD(mondayOf(today())));return [...set].sort().reverse();}
+function kidWeekRecords(kidId,mon){return weekDates(mon).map(ds=>({ds,r:DB.records[ds+'_'+kidId]})).filter(x=>x.r);}
+function mode(arr){if(!arr.length)return null;const c={};arr.forEach(x=>c[x]=(c[x]||0)+1);return Object.keys(c).sort((a,b)=>c[b]-c[a])[0];}
+
+function aggregateWeek(k,items){
+ const days=items.length;
+ const present=items.filter(x=>x.r.attendance==='正常出勤').length;
+ const lunchMode=mode(items.map(x=>x.r.lunch).filter(Boolean));
+ const picks=[...new Set(items.flatMap(x=>x.r.pick||[]).filter(p=>p!=='无'))];
+ const stoolDays=items.filter(x=>x.r.stoolCount&&x.r.stoolCount!=='0次').length;
+ const naps=items.map(x=>napMinutes(x.r)).filter(n=>n!=null);
+ const napAvg=naps.length?Math.round(naps.reduce((a,b)=>a+b,0)/naps.length):null;
+ const moodOk=items.filter(x=>['愉快','平静'].includes(x.r.mood)).length;
+ const socialMode=mode(items.map(x=>x.r.social).filter(Boolean));
+ const actCount={};items.forEach(x=>(x.r.activity||[]).forEach(a=>actCount[a]=(actCount[a]||0)+1));
+ const topActs=Object.keys(actCount).sort((a,b)=>actCount[b]-actCount[a]).slice(0,2);
+ const highlights=items.map(x=>({ds:x.ds.slice(5),h:x.r.highlight})).filter(x=>x.h).slice(0,3);
+ const attentions=[...new Set(items.map(x=>x.r.attention).filter(Boolean))];
+ const injuries=items.filter(x=>x.r.injury==='有');
+ return {days,present,lunchMode,picks,stoolDays,napAvg,moodOk,socialMode,topActs,highlights,attentions,injuries};
+}
+function generateWeekly(k,items,mon){
+ const a=aggregateWeek(k,items);
+ const dnm=displayName(k);
+ const d=weekDates(mon);
+ const label=d[0].slice(5).replace('-','/')+' ~ '+d[6].slice(5).replace('-','/');
+ const L=[];
+ L.push(`${k.name} · ${label} 周评`,'');
+ L.push(`${k.parent}好，这周${dnm}的情况给您做个小结。`,'');
+ const kw=[];
+ kw.push(a.present===a.days&&a.days>=4?'全勤':`本周到园 ${a.present} 天`);
+ const lunchKw={'全部吃完':'胃口很好','吃了大半':'胃口不错','吃了一半':'胃口一般','少量':'胃口偏弱','未进食':'胃口偏弱'};
+ if(a.lunchMode)kw.push(lunchKw[a.lunchMode]);
+ const socialKw={'主动合作':'社交有进步','被动跟随':'和同伴玩得融洽','独处':'喜欢自己玩','有冲突':'与同伴有些小摩擦'};
+ if(a.socialMode)kw.push(socialKw[a.socialMode]);
+ L.push(`【本周总览】${kw.filter(Boolean).join('、')}。`,'');
+ let dn='';
+ if(a.days<2)dn='本周数据较少，暂不做小结。';
+ else{
+  const lunchDesc={'全部吃完':'基本都能光盘','吃了大半':'吃了大半','吃了一半':'吃了一半左右','少量':'只吃了一点','未进食':'基本没怎么吃'};
+  dn+='吃饭：'+(a.lunchMode?`午餐${lunchDesc[a.lunchMode]}`:'午餐数据较少');
+  if(a.picks.length)dn+=`，${a.picks.join('、')}还是不太爱吃`;
+  dn+='。';
+  dn+=a.napAvg!=null?`午睡平均 ${Math.floor(a.napAvg/60)} 小时 ${a.napAvg%60} 分。`:'午睡数据较少。';
+  dn+=`排便规律 ${a.stoolDays} 天。`;
+ }
+ L.push(`【饮食作息】${dn}`);
+ let es='';
+ if(a.days<2)es='本周数据较少，暂不做小结。';
+ else{
+  es=`情绪：${a.days} 天里 ${a.moodOk} 天状态不错。`;
+  const socialDesc={'主动合作':'主动和小朋友一起玩，有合作意识','被动跟随':'跟着小朋友一起玩','独处':'更喜欢自己玩一会儿','有冲突':'和小朋友有过小摩擦，我们都及时引导了'};
+  if(a.socialMode)es+=`社交：${socialDesc[a.socialMode]}。`;
+ }
+ L.push(`【情绪与社交】${es}`);
+ let ac='';
+ if(a.days<2)ac='本周数据较少，暂不做小结。';
+ else ac=a.topActs.length?`最喜欢${a.topActs.join('和')}。`:'活动偏好暂不明显。';
+ L.push(`【活动与兴趣】${ac}`,'');
+ if(a.highlights.length){
+  L.push('【成长亮点】');
+  a.highlights.forEach((h,i)=>L.push(`${i+1}. （${h.ds}）${h.h}`));
+ }else L.push('【成长亮点】本周未记录到具体事例，下周我们会多观察。');
+ L.push('');
+ let sug='';
+ if(a.picks.includes('蔬菜'))sug='青菜接受度还在努力，我们继续用"一口就好"的方式引导，家里也可以同步试试。';
+ else if(a.stoolDays<a.days*0.6)sug=`本周有 ${a.days-a.stoolDays} 天没有排便记录，建议多补充膳食纤维和水分。`;
+ else if(a.napAvg!=null&&a.napAvg<60)sug='午睡时长偏短，建议晚上适当早点休息。';
+ else if(a.moodOk<a.days*0.6)sug='本周情绪波动略多，我们会在园多观察原因，也请家里多和孩子聊聊。';
+ else sug='保持现在的节奏就好，期待下周。';
+ L.push(`【一条建议】${sug}`,'');
+ if(a.attentions.length)L.push(`【需关注事项】${a.attentions.join('；')}`,'');
+ if(a.injuries.length)L.push(`【备注】本周有 ${a.injuries.length} 次轻微外伤，当时已单独与家长同步。`,'');
+ L.push('—— 老师');
+ return L.join('\n');
+}
+function renderWeekly(){
+ const sel=document.getElementById('weekSelect');
+ const weeks=getWeeks();
+ if(!curWeek||!weeks.includes(curWeek))curWeek=weeks[0];
+ sel.innerHTML=weeks.map(w=>{const d=weekDates(w);return `<option value="${w}" ${w===curWeek?'selected':''}>${w.slice(5).replace('-','/')} ~ ${d[6].slice(5).replace('-','/')} 这一周</option>`;}).join('');
+ document.getElementById('weekLabel').textContent=curWeek.slice(5).replace('-','/')+' 周';
+ renderWeeklyPick();
+}
+function renderWeeklyPick(){
+ const sel=document.getElementById('weekSelect');
+ if(sel.value)curWeek=sel.value;
+ const g=document.getElementById('weeklyPick');g.innerHTML='';
+ if(!DB.kids.length){g.innerHTML='<div class="empty">请先在「名单」页添加孩子</div>';return;}
+ let hasData=0;
+ DB.kids.forEach(k=>{
+  const items=kidWeekRecords(k.id,curWeek);
+  if(items.length)hasData++;
+  const d=document.createElement('div');d.className='kid'+(items.length?' done':'')+(weekKid===k.id?' on':'');
+  d.innerHTML=`<div class="nm">${k.name}${k.nickname?' <span class="tag b-purple">'+k.nickname+'</span>':''}</div><div class="st">${items.length?items.length+' 天记录':'本周无记录'}</div>`;
+  d.onclick=()=>{if(!items.length){toast('这个孩子本周还没有记录');return;}weekKid=k.id;renderWeeklyPick();showWeekly(k,items);};
+  g.appendChild(d);
+ });
+ document.getElementById('weekStat').textContent='本周 '+hasData+'/'+DB.kids.length+' 人有记录';
+}
+function showWeekly(k,items){
+ document.getElementById('weeklyBody').style.display='block';
+ const warn=document.getElementById('weeklyWarn');
+ const a=aggregateWeek(k,items);
+ if(items.length<3)warn.innerHTML='<div class="warnbox wb-yellow">🟡 本周仅 '+items.length+' 天记录，小结可能不完整。数据不足的维度会如实标注"数据较少"，不会编造。</div>';
+ else if(a.injuries.length)warn.innerHTML='<div class="warnbox wb-yellow">🟡 本周有 '+a.injuries.length+' 次轻微外伤记录（当时已单独同步家长）。发送周评前请核对措辞。</div>';
+ else warn.innerHTML='';
+ const text=generateWeekly(k,items,curWeek);
+ document.getElementById('weeklyText').textContent=text;
+ document.getElementById('weeklyLen').textContent=text.replace(/\n/g,'').length+' 字';
+}
+function copyWeekly(){if(!weekKid){toast('请先选择孩子');return;}const k=DB.kids.find(x=>x.id===weekKid);copyText(generateWeekly(k,kidWeekRecords(k.id,curWeek),curWeek),'周报已复制');}
+function copyWeeklySummary(){
+ if(!weekKid){toast('请先选择孩子');return;}
+ const k=DB.kids.find(x=>x.id===weekKid);
+ const items=kidWeekRecords(k.id,curWeek);
+ const s=JSON.stringify({孩子:k.name,周次:curWeek,聚合:aggregateWeek(k,items),逐日:items.map(x=>({日期:x.ds,...x.r}))},null,1);
+ copyText(s,'聚合数据已复制，可粘贴给 AI 润色');
+}
+function genAllWeekly(){
+ allWeeklyCache=[];
+ const list=document.getElementById('weeklyList');list.innerHTML='';
+ let n=0;
+ DB.kids.forEach(k=>{
+  const items=kidWeekRecords(k.id,curWeek);
+  if(items.length<2)return;
+  const idx=allWeeklyCache.length;
+  allWeeklyCache.push({k,text:generateWeekly(k,items,curWeek),items});
+  n++;
+ });
+ if(!n){list.innerHTML='<div class="empty">本周没有录入 ≥2 天的孩子。请先在「录入」页记录。</div>';toast('没有可生成的周报');return;}
+ allWeeklyCache.forEach((x,idx)=>{
+  const a=aggregateWeek(x.k,x.items);
+  const lv=(a.injuries.length||x.items.length<3)?'yellow':'green';
+  const d=document.createElement('div');d.className='batch-item '+lv;
+  d.innerHTML=`<div class="hd"><span class="nm">${lv==='yellow'?'🟡':'🟢'} ${x.k.name}</span><span class="tag b-blue">${x.items.length} 天记录</span></div>
+   <div class="txt">${x.text.replace(/\n/g,'<br>')}</div>
+   <div class="ops"><button class="btn btn-sm btn-g" onclick="copyWeeklyIdx(${idx})">📋 复制这条</button></div>`;
+  list.appendChild(d);
+ });
+ toast('已生成 '+n+' 份周报');
+}
+function copyWeeklyIdx(i){copyText(allWeeklyCache[i].text,'已复制 '+allWeeklyCache[i].k.name+' 的周报');}
+function copyAllWeekly(){
+ if(!allWeeklyCache.length){toast('请先点「生成全班周报」');return;}
+ copyText(allWeeklyCache.map(x=>x.text).join('\n\n————————————\n\n'),'已复制 '+allWeeklyCache.length+' 份周报');
+}
+
+/* ===== 通知公告 ===== */
+const FILL=(v,label)=>(v&&v.trim())?v.trim():'[待填写：'+label+']';
+/* 通知话术库：三种语气 × 开头/结尾/温馨提示，每类 16 条轮换 */
+const NT_BASE={
+ '亲切活泼':{
+  open:['亲爱的大朋友们，你们好呀！','亲爱的大朋友们，老师来喊你们啦！','亲爱的家长朋友们，大家好呀！','各位宝爸宝妈，你们好！','亲爱的大朋友、可爱的小朋友们，大家好！','各位家长好呀，有个好消息要告诉你们！','亲爱的家人们，大家好！','亲爱的大朋友们，老师有件事要跟大家说～','各位宝爸宝妈好呀，来跟大家同步一件事！','亲爱的家长朋友们，大家好～','亲爱的大朋友们，今天老师想跟你们说：','各位家长好呀，下面这件事请大家留意：','亲爱的家人们好呀，跟你们说个事儿！','亲爱的大朋友们，老师有话跟大家讲～','各位宝爸宝妈好呀，请往下看：','亲爱的家长朋友们，今天跟大家说件事：'],
+  close:['有问题随时联系老师，谢谢配合！','感谢家人们的配合与支持！','有疑问随时私信老师哟～','谢谢大家的支持，爱你们的老师～','有问题随时找老师，感谢配合！','感谢家长们的配合，期待与你们见面！','有疑问随时联系，谢谢啦！','谢谢大家的配合，老师们很期待哟～','有问题随时跟我说，感谢支持！','感谢家人们的配合，期待那一天！','有疑问随时私信我哟～','谢谢大家的支持与配合！','有问题随时联系老师哟～','感谢配合，我们不见不散！','有疑问随时找我，谢谢大家！','感谢家长们的支持与配合！'],
+  tip:['🌈 温馨提示：','💗 温馨提示：','🔔 小贴士来啦：','💡 温馨提醒：','🌸 温馨提示：','❣️ 小贴士：','🎈 温馨提示：','🔔 温馨提醒：','💕 小贴士来啦：','🌈 温馨提示来啦：','💗 温馨提醒：','🔔 小贴士：','🌸 温馨提醒：','❣️ 温馨提示：','🎈 小贴士来啦：','💡 温馨提示：']
+ },
+ '温和正式':{
+  open:['各位家长，您好。','尊敬的各位家长，您好。','各位家长朋友，大家好。','尊敬的家长朋友们，您好。','各位家长，现将相关事项通知如下。','尊敬的各位家长，现将安排通知如下。','各位家长朋友，您好，现将事项同步如下。','尊敬的家长朋友们，您好，现将事项告知如下。','各位家长，您好，现将安排告知如下。','各位家长朋友，大家好，现将事项通知如下。','尊敬的各位家长，您好，现将事项通知如下。','各位家长，您好，现将相关安排同步如下。','尊敬的家长朋友们，现将事项通知如下。','各位家长朋友，您好，现将安排告知如下。','尊敬的各位家长，现将相关事项通知如下。','各位家长，您好，现将安排通知如下。'],
+  close:['感谢您的配合与支持。','如有疑问，欢迎随时与我们联系。','感谢您的支持与配合。','如有疑问，请及时与我们联系。','感谢您的配合。','如有任何疑问，欢迎随时联系。','感谢您一直以来的支持与配合。','如有疑问，请及时与我们联系，谢谢。','感谢您的理解与配合。','如有疑问，欢迎随时与我们沟通。','感谢您的支持与理解。','如有任何疑问，请及时与我们联系。','感谢您的配合，祝生活愉快。','如有疑问，欢迎随时联系，谢谢。','感谢您一直以来对我们的支持。','感谢您的配合与支持，谢谢。'],
+  tip:['温馨提示：','温馨提醒：','请注意以下事项：','以下为温馨提示：','请留意：','温馨提示如下：','温馨提醒如下：','请注意：','以下为温馨提醒：','请留意以下事项：','温馨提示如下，请留意：','温馨提醒如下，请知悉：','以下事项请注意：','以下为温馨提示，请留意：','请注意以下几点：','温馨提示，请知悉：']
+ },
+ '简洁干练':{
+  open:['各位家长：','各位家长好：','家长朋友们：','各位家长，通知如下：','家长朋友们好：','各位家长好，以下事项请留意：','各位家长：以下安排请告知','家长朋友们好，通知如下：','各位家长好，请注意以下事项：','各位家长：现将安排通知如下','家长朋友们：以下事项请留意','各位家长好，通知如下','各位家长：以下安排请知悉','家长朋友们好，请注意：','各位家长好，以下事项请知悉：','各位家长：现将事项通知如下'],
+  close:['收到请回复，谢谢。','如有疑问请私信，谢谢。','请知悉，谢谢。','收到请回复。','如有疑问请联系老师。','请按时安排，谢谢。','收到请回复确认。','如有疑问请私信老师。','请留意时间，谢谢。','收到请在群内回复。','如有疑问请联系。','请按上述安排执行，谢谢。','收到请回复，感谢。','如有疑问请随时联系。','请提前安排，谢谢。','收到请回复，感谢配合。'],
+  tip:['提示：','注意：','温馨提示：','请注意：','提示如下：','注意以下：','以下为提示：','注意以下事项：','请留意：','提示如下，请知悉：','注意如下：','请注意以下几点：','提示如下，请留意：','以下注意事项：','请知悉：','提示如下，请注意：']
+ }
+};
+let curNoticeTone='亲切活泼',ntIdx=0,NT={open:'',close:'',tip:''};
+function getNoticeTone(){
+ const base=NT_BASE[curNoticeTone]||NT_BASE['亲切活泼'];
+ const custom=(DB.noticePhrases&&DB.noticePhrases[curNoticeTone])||{};
+ const out={};
+ ['open','close','tip'].forEach(k=>{out[k]=Array.isArray(base[k])?base[k].slice():[];if(custom[k]&&custom[k].length)out[k]=custom[k].slice();});
+ return out;
+}
+function rollNT(){const t=getNoticeTone();NT={open:pick(t.open,ntIdx),close:pick(t.close,ntIdx),tip:pick(t.tip,ntIdx)};}
+
+const NOTICE_TPL={
+ '兴趣班报名':{
+  fields:[['name','课程名称','如：秋季中国象棋启蒙班',1],['intro','一句话卖点（选填）','如：象棋特别锻炼孩子的专注力和逻辑思维',0],['age','适龄','如：大班（5–6岁）',1],['weekday','上课星期','如：每周三',1],['time','时间段','如：16:00–16:45',1],['place','地点','如：二楼多功能活动室',1],['teacher','授课老师（选填）','如：李老师（市棋协三级教练）',0],['cap','名额','如：12人',1],['enrolled','已报（选填）','如：7人',0],['fee','费用','如：600元/学期（16课时，含棋具）',1],['deadline','报名截止','如：9月12日（周五）17:00',1],['method','报名方式','如：班级群接龙',1],['faq','常见问题（选填）','Q：零基础能学吗？\nA：可以，从认棋子开始。',0,'ta'],['sign','落款','如：中班B班 王老师',0]],
+  gen:(f)=>{
+   let t=`📢 ${FILL(f.name,'课程名称')}开始报名啦\n\n${NT.open}`;
+   if(f.intro)t+=f.intro+'。';
+   t+=`\n\n📋 课程信息\n· 课程：${FILL(f.name,'课程名称')}\n· 适龄：${FILL(f.age,'适龄')}\n· 上课时间：${FILL(f.weekday,'上课星期')} ${FILL(f.time,'时间段')}\n· 地点：${FILL(f.place,'地点')}`;
+   if(f.teacher)t+=`\n· 授课老师：${f.teacher}`;
+   t+=`\n· 名额：${FILL(f.cap,'名额')}`;
+   if(f.enrolled)t+=`（已报 ${f.enrolled}）`;
+   t+=`\n· 费用：${FILL(f.fee,'费用')}\n\n⏰ 报名截止：${FILL(f.deadline,'报名截止')}\n📝 报名方式：${FILL(f.method,'报名方式')}`;
+   if(f.faq)t+=`\n\n❓ 常见问题\n${f.faq}`;
+   t+=`\n\n名额有限，先到先得。${NT.close}\n\n—— ${f.sign||'老师'}`;
+   return t;
+  }
+ },
+ '活动通知':{
+  fields:[['name','活动名称','如：秋季亲子运动会',1],['date','活动日期','如：10月15日（周三）',1],['time','时间','如：上午9:00–11:00',1],['place','地点','如：户外操场',1],['desc','活动内容','如：亲子接力赛、拔河、颁奖',0,'ta'],['prepare','需要准备的物品','如：运动鞋、水壶、汗巾',0],['note','注意事项','如：请家长穿便于运动的服装',0,'ta'],['sign','落款','如：中班B班 王老师',0]],
+  gen:(f)=>`📅 ${FILL(f.name,'活动名称')}通知\n\n${NT.open}\n我们将举行${FILL(f.name,'活动名称')}，请您留意安排：\n\n· 日期：${FILL(f.date,'活动日期')}\n· 时间：${FILL(f.time,'时间')}\n· 地点：${FILL(f.place,'地点')}${f.desc?`\n· 活动内容：${f.desc}`:''}${f.prepare?`\n· 需要为宝贝准备：${f.prepare}`:''}${f.note?`\n\n${NT.tip}${f.note}`:''}\n\n请提前安排好时间。${NT.close}\n\n—— ${f.sign||'老师'}`
+ },
+ '放假安排':{
+  fields:[['holiday','节日名称','如：国庆节',1],['start','放假开始','如：10月1日（周三）',1],['end','放假结束','如：10月7日（周二）',1],['ret','返园日期','如：10月8日（周三）正常返园',1],['safety','假期安全提示','如：外出注意交通安全；饮食规律，少吃生冷；作息尽量与幼儿园保持一致',0,'ta'],['sign','落款','如：中班B班 王老师',0]],
+  gen:(f)=>`🎈 ${FILL(f.holiday,'节日名称')}放假安排通知\n\n${NT.open}\n${FILL(f.holiday,'节日名称')}假期安排如下：\n\n· 放假时间：${FILL(f.start,'放假开始')} ~ ${FILL(f.end,'放假结束')}\n· 返园时间：${FILL(f.ret,'返园日期')}\n\n${NT.tip}假期安全小贴士\n${f.safety||'[待填写：假期安全提示]'}\n\n祝您和宝贝假期愉快！${NT.close}\n\n—— ${f.sign||'老师'}`
+ },
+ '物品准备':{
+  fields:[['reason','原因说明','如：下周开始美术特色课',1],['items','需要准备的东西','如：1. 围裙一件（写名字）\n2. 水彩笔一盒\n3. 旧报纸若干',1,'ta'],['deadline','带来截止时间','如：下周一（9月15日）前',1],['note','备注（选填）','如：所有物品请贴上名字贴',0],['sign','落款','如：中班B班 王老师',0]],
+  gen:(f)=>`🎒 物品准备通知\n\n${NT.open}\n因${FILL(f.reason,'原因说明')}，请为宝贝准备以下物品：\n\n${FILL(f.items,'需要准备的东西')}\n\n请于 ${FILL(f.deadline,'带来截止时间')} 带来幼儿园。${f.note?`\n${NT.tip}${f.note}`:''}\n\n${NT.close}\n\n—— ${f.sign||'老师'}`
+ },
+ '健康提醒':{
+  fields:[['topic','主题','如：秋季腹泻预防',1],['kg','园所措施','如：加强晨检、玩具每日消毒、提醒勤洗手',0,'ta'],['home','家庭配合事项','如：1. 饭前便后洗手\n2. 不吃生冷食物\n3. 出现呕吐腹泻及时就医并告知老师',1,'ta'],['sign','落款','如：中班B班 王老师',0]],
+  gen:(f)=>`💪 ${FILL(f.topic,'主题')}健康提醒\n\n${NT.open}\n近期是${FILL(f.topic,'主题')}的高发期，请留意以下事项：\n\n${f.kg?`【园所措施】\n${f.kg}\n\n`:''}【家庭配合】\n${FILL(f.home,'家庭配合事项')}\n\n如宝贝出现不适，请第一时间告知我们。一起守护宝贝健康！${NT.close}\n\n—— ${f.sign||'老师'}`
+ },
+ '家长会':{
+  fields:[['topic','会议主题','如：新学期家长会',1],['date','会议日期','如：9月19日（周五）',1],['time','会议时间','如：18:30–20:00',1],['place','会议地点','如：本班教室',1],['agenda','会议内容','如：1. 本学期教学计划\n2. 家园配合事项\n3. 答疑交流',0,'ta'],['note','注意事项（选填）','如：请尽量由爸爸或妈妈参加，不带宝贝入场',0],['sign','落款','如：中班B班 王老师',0]],
+  gen:(f)=>`🤝 ${FILL(f.topic,'会议主题')}邀请\n\n${NT.open}\n我们将召开「${FILL(f.topic,'会议主题')}」，诚邀您参加。\n\n· 日期：${FILL(f.date,'会议日期')}\n· 时间：${FILL(f.time,'会议时间')}\n· 地点：${FILL(f.place,'会议地点')}${f.agenda?`\n\n【会议内容】\n${f.agenda}`:''}${f.note?`\n\n📌 温馨提示：${f.note}`:''}\n\n请提前安排好时间，收到请在群里回复确认，谢谢！\n\n—— ${f.sign||'老师'}`
+ },
+ '自定义通知':{
+  fields:[['title','通知标题','如：春游车辆安排',1],['body','通知正文','如：本周五春游统一乘坐大巴，早上8:20在园门口集合，请提前10分钟到。',1,'ta'],['note','温馨提示（选填）','如：请给宝贝穿运动鞋，带水壶',0,'ta'],['sign','落款','如：中班B班 王老师',0]],
+  gen:(f)=>`📢 ${FILL(f.title,'通知标题')}\n\n${NT.open}\n${FILL(f.body,'通知正文')}${f.note?`\n\n📌 温馨提示：${f.note}`:''}\n\n${NT.close}\n\n—— ${f.sign||'老师'}`
+ }
+};
+let curNoticeType='兴趣班报名';
+function renderNoticeFields(){
+ const box=document.getElementById('noticeFields');
+ const tpl=NOTICE_TPL[curNoticeType];
+ const draft=(DB.noticeDrafts&&DB.noticeDrafts[curNoticeType])||{};
+ box.innerHTML=tpl.fields.map(fd=>{
+  const key=fd[0],label=fd[1],ph=fd[2],req=fd[3],isTA=fd[4]==='ta';
+  const val=(draft[key]||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  return `<div class="fl">${label}${req?' <span class="req">● 必填</span>':''}</div>${isTA?`<textarea id="nf_${key}" placeholder="${ph}">${val}</textarea>`:`<input type="text" id="nf_${key}" placeholder="${ph}" value="${val}">`}`;
+ }).join('');
+}
+document.querySelectorAll('#noticeType .chip').forEach(c=>{
+ c.onclick=()=>{document.querySelectorAll('#noticeType .chip').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');curNoticeType=c.textContent.trim();renderNoticeFields();};
+});
+document.querySelectorAll('#noticeToneChips .chip').forEach(c=>{
+ c.onclick=()=>{document.querySelectorAll('#noticeToneChips .chip').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');curNoticeTone=c.textContent.trim();ntIdx=0;rollNT();toast('已切换语气：'+curNoticeTone);};
+});
+rollNT();
+function buildNoticeText(){
+ const tpl=NOTICE_TPL[curNoticeType];
+ const f={};
+ tpl.fields.forEach(fd=>{const el=document.getElementById('nf_'+fd[0]);if(el)f[fd[0]]=el.value.trim();});
+ if(!DB.noticeDrafts)DB.noticeDrafts={};
+ DB.noticeDrafts[curNoticeType]=f;
+ return tpl.gen(f);
+}
+function renderNoticePreview(){
+ const text=buildNoticeText();
+ document.getElementById('noticeText').textContent=text;
+ document.getElementById('noticeLen').textContent=text.replace(/\n/g,'').length+' 字';
+ return text;
+}
+function genNotice(){
+ rollNT();
+ const text=renderNoticePreview();
+ DB.notices=DB.notices||[];
+ DB.notices.unshift({type:curNoticeType,ts:new Date().toLocaleString('zh-CN',{hour12:false}),text});
+ if(DB.notices.length>20)DB.notices.length=20;
+ save();renderNoticeList();
+ if(text.includes('[待填写'))toast('已生成，但有 [待填写] 项，请补全后再发');else toast('已生成并存入历史');
+}
+function regenNotice(){
+ ntIdx++;rollNT();
+ renderNoticePreview();
+ toast('已换一版措辞');
+}
+function copyNotice(){
+ const t=document.getElementById('noticeText').textContent;
+ if(!t||t.startsWith('点击上方')){toast('请先生成通知');return;}
+ copyText(t,'通知已复制，去班级群粘贴吧');
+}
+function copyNoticeSummary(){
+ const tpl=NOTICE_TPL[curNoticeType];const f={};
+ tpl.fields.forEach(fd=>{const el=document.getElementById('nf_'+fd[0]);if(el)f[fd[0]]=el.value.trim();});
+ copyText(JSON.stringify({类型:curNoticeType,字段:f},null,1),'已复制，可粘贴给 AI 润色');
+}
+function clearNotice(){
+ NOTICE_TPL[curNoticeType].fields.forEach(fd=>{const el=document.getElementById('nf_'+fd[0]);if(el)el.value='';});
+ if(DB.noticeDrafts)delete DB.noticeDrafts[curNoticeType];
+ save();toast('已清空');
+}
+function renderNoticeList(){
+ const list=document.getElementById('noticeList');
+ DB.notices=DB.notices||[];
+ document.getElementById('noticeCount').textContent=DB.notices.length+' 条';
+ if(!DB.notices.length){list.innerHTML='<div class="empty">还没有历史通知。生成后会自动保存在这里。</div>';return;}
+ list.innerHTML='';
+ DB.notices.forEach((n,i)=>{
+  const d=document.createElement('div');d.className='batch-item';
+  d.innerHTML=`<div class="hd"><span class="nm">📢 ${n.type}</span><span class="tag b-blue">${n.ts}</span></div>
+   <div class="txt">${n.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>
+   <div class="ops">
+     <button class="btn btn-sm btn-g" onclick="copyNoticeIdx(${i})">📋 复制</button>
+     <button class="btn btn-sm" onclick="delNotice(${i})">🗑 删除</button>
+   </div>`;
+  list.appendChild(d);
+ });
+}
+function copyNoticeIdx(i){copyText(DB.notices[i].text,'已复制');}
+function delNotice(i){if(confirm('删除这条历史通知？')){DB.notices.splice(i,1);save();renderNoticeList();}}
+
+/* ===== 我的模板（粘贴保存通知原文） ===== */
+function saveMyTpl(){
+ const name=(document.getElementById('myTplName').value||'').trim();
+ const text=(document.getElementById('myTplText').value||'').trim();
+ if(!name){toast('请先填模板名称');return;}
+ if(!text){toast('请先粘贴通知内容');return;}
+ DB.myTpl=DB.myTpl||[];
+ DB.myTpl.unshift({name:name,text:text,ts:new Date().toLocaleString('zh-CN',{hour12:false})});
+ if(DB.myTpl.length>30)DB.myTpl.length=30;
+ save();
+ document.getElementById('myTplName').value='';
+ document.getElementById('myTplText').value='';
+ renderMyTplList();
+ toast('模板已保存');
+}
+function renderMyTplList(){
+ const list=document.getElementById('myTplList');
+ if(!list)return;
+ DB.myTpl=DB.myTpl||[];
+ if(!DB.myTpl.length){list.innerHTML='<div class="empty">还没有保存的模板。把写过的通知粘贴到上方即可。</div>';return;}
+ list.innerHTML='';
+ DB.myTpl.forEach((t,i)=>{
+  const d=document.createElement('div');d.className='batch-item';
+  d.innerHTML=`<div class="hd"><span class="nm">📄 ${t.name}</span><span class="tag b-blue">${t.ts}</span></div>
+   <div class="txt">${t.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>
+   <div class="ops">
+     <button class="btn btn-sm btn-g" onclick="copyMyTpl(${i})">📋 复制</button>
+     <button class="btn btn-sm" onclick="delMyTpl(${i})">🗑 删除</button>
+   </div>`;
+  list.appendChild(d);
+ });
+}
+function copyMyTpl(i){copyText(DB.myTpl[i].text,'模板已复制，改几个数字就能发');}
+function delMyTpl(i){if(confirm('删除这个模板？')){DB.myTpl.splice(i,1);save();renderMyTplList();}}
+
+/* ===== 文案措辞库 ===== */
+const PHRASE_FIELDS=[
+ ['energy','精神活力',['非常活跃','正常','略蔫','明显疲惫']],
+ ['mood','情绪基调',['愉快','平静','易烦躁','低落','哭闹']],
+ ['meal','进食（早/午餐）',['全部吃完','吃了大半','吃了一半','少量','未进食']],
+ ['snack','加餐',['正常','少量','未吃']],
+ ['water','喝水',['充足','正常','偏少']],
+ ['stool','排便性状',['正常','偏干硬','偏稀','异常']],
+ ['nap','午睡',['正常入睡','入睡困难','中途醒来','未午睡']],
+ ['social','社交互动',['主动合作','被动跟随','独处','有冲突']],
+ ['perf','活动投入',['主动投入','一般参与','旁观','拒绝参与']]
+];
+let curPhraseField='energy';
+/* ===== 粘贴导入 ===== */
+function renderPasteSelectors(){
+ const fs=document.getElementById('piField');
+ if(!fs)return;
+ fs.innerHTML=PHRASE_FIELDS.map(([f,label])=>`<option value="${f}" ${f===curPhraseField?'selected':''}>${label}</option>`).join('');
+ fs.onchange=()=>{curPhraseField=fs.value;renderPasteSelectors();};
+ const def=PHRASE_FIELDS.find(x=>x[0]===curPhraseField);
+ const vs=document.getElementById('piValue');
+ vs.innerHTML=def[2].map(v=>`<option value="${v}">${v}</option>`).join('');
+}
+function pasteImport(){
+ const field=document.getElementById('piField').value;
+ const value=document.getElementById('piValue').value;
+ const raw=document.getElementById('piText').value||'';
+ const lines=raw.split('\n').map(s=>s.trim()).filter(Boolean);
+ const st=document.getElementById('piStatus');
+ if(!lines.length){st.textContent='请先粘贴内容（每行一条）。';toast('没有可导入的内容');return;}
+ DB.phrases=DB.phrases||{};DB.phrases[field]=DB.phrases[field]||{};
+ const cur=DB.phrases[field][value]||[];
+ const base=Array.isArray(PH[field][value])?PH[field][value]:[PH[field][value]];
+ const existed={};
+ base.forEach(s=>existed[s]=1);cur.forEach(s=>existed[s]=1);
+ let added=0,skipped=0;
+ lines.forEach(s=>{if(existed[s]){skipped++;}else{existed[s]=1;cur.push(s);added++;}});
+ if(added){DB.phrases[field][value]=cur;save();}
+ const label=(PHRASE_FIELDS.find(x=>x[0]===field)||[])[1]||field;
+ st.textContent=`已导入 ${added} 条到「${label} / ${value}」${skipped?`（${skipped} 条重复已跳过）`:''}。当前该值共 ${cur.length+base.length} 条措辞可用。`;
+ document.getElementById('piText').value='';
+ renderPhrasePage();
+ toast(added?`已导入 ${added} 条`:'内容已存在，未新增');
+}
+
+function renderPhrasePage(){
+ const wrap=document.getElementById('phraseField');wrap.innerHTML='';
+ PHRASE_FIELDS.forEach(([f,label])=>{
+  const c=document.createElement('div');c.className='chip'+(f===curPhraseField?' sel':'');c.textContent=label;
+  c.onclick=()=>{curPhraseField=f;renderPhrasePage();};
+  wrap.appendChild(c);
+ });
+ const def=PHRASE_FIELDS.find(x=>x[0]===curPhraseField);
+ const base=PH[curPhraseField]||{};
+ const custom=(DB.phrases&&DB.phrases[curPhraseField])||{};
+ const box=document.getElementById('phraseEdit');box.innerHTML='';
+ def[2].forEach(v=>{
+  const builtin=Array.isArray(base[v])?base[v]:[base[v]||''];
+  const mine=custom[v]||[];
+  const div=document.createElement('div');div.style.marginBottom='14px';
+  div.innerHTML=`<div class="fl">${v} <span class="tag b-blue">内置 ${builtin.length} 种</span>${mine.length?' <span class="tag b-purple">自定义 '+mine.length+' 种（生效）</span>':''}</div>
+   <div class="hint" style="margin-bottom:6px">内置：${builtin.join(' ｜ ')}</div>
+   <textarea id="ph_${v}" placeholder="自定义措辞，每行一条（会覆盖内置）。留空则用内置。">${mine.join('\n')}</textarea>
+   <div class="ops"><button class="btn btn-sm" onclick="savePhrase('${v}')">💾 保存该条</button><button class="btn btn-sm" onclick="clearPhrase('${v}')">♻️ 恢复内置</button></div>`;
+  box.appendChild(div);
+ });
+ document.getElementById('phraseUrl').value=DB.phraseUrl||'';
+ const st=document.getElementById('phraseUrlStatus');
+ st.textContent=DB.phraseLastFetch?('上次联网更新：'+DB.phraseLastFetch):'尚未联网更新过，当前使用本地措辞。';
+ renderPasteSelectors();
+ renderNtEditor();
+}
+function savePhrase(v){
+ const el=document.getElementById('ph_'+v);
+ const arr=el.value.split('\n').map(s=>s.trim()).filter(Boolean);
+ DB.phrases=DB.phrases||{};DB.phrases[curPhraseField]=DB.phrases[curPhraseField]||{};
+ if(arr.length)DB.phrases[curPhraseField][v]=arr;else delete DB.phrases[curPhraseField][v];
+ save();renderPhrasePage();toast('已保存，生成日报时立即生效');
+}
+function clearPhrase(v){
+ if(DB.phrases&&DB.phrases[curPhraseField])delete DB.phrases[curPhraseField][v];
+ save();renderPhrasePage();toast('已恢复内置');
+}
+/* ===== 通知话术编辑器 ===== */
+let curNtTone='亲切活泼';
+const NT_PARTS=[['open','开头称呼'],['close','结尾致谢'],['tip','温馨提示前缀']];
+function renderNtEditor(){
+ const wrap=document.getElementById('ntToneChips');
+ if(wrap){wrap.innerHTML='';['亲切活泼','温和正式','简洁干练'].forEach(t=>{
+  const c=document.createElement('div');c.className='chip'+(t===curNtTone?' sel':'');c.textContent=t;
+  c.onclick=()=>{curNtTone=t;renderNtEditor();};
+  wrap.appendChild(c);
+ });}
+ const box=document.getElementById('ntEdit');if(!box)return;
+ box.innerHTML='';
+ const base=(NT_BASE[curNtTone])||{};
+ const custom=(DB.noticePhrases&&DB.noticePhrases[curNtTone])||{};
+ NT_PARTS.forEach(([k,label])=>{
+  const builtin=base[k]||[];
+  const mine=custom[k]||[];
+  const div=document.createElement('div');div.style.marginBottom='14px';
+  div.innerHTML=`<div class="fl">${label} <span class="tag b-blue">内置 ${builtin.length} 条</span>${mine.length?' <span class="tag b-purple">自定义 '+mine.length+' 条（生效）</span>':''}</div>
+   <div class="hint" style="margin-bottom:6px">内置示例：${builtin.slice(0,3).join(' ｜ ')}…</div>
+   <textarea id="nt_${k}" placeholder="自定义话术，每行一条（会覆盖内置）。留空则用内置。">${mine.join('\n')}</textarea>
+   <div class="ops"><button class="btn btn-sm" onclick="saveNt('${k}')">💾 保存</button><button class="btn btn-sm" onclick="clearNt('${k}')">♻️ 恢复内置</button></div>`;
+  box.appendChild(div);
+ });
+}
+function saveNt(k){
+ const el=document.getElementById('nt_'+k);
+ const arr=el.value.split('\n').map(s=>s.trim()).filter(Boolean);
+ DB.noticePhrases=DB.noticePhrases||{};DB.noticePhrases[curNtTone]=DB.noticePhrases[curNtTone]||{};
+ if(arr.length)DB.noticePhrases[curNtTone][k]=arr;else delete DB.noticePhrases[curNtTone][k];
+ save();renderNtEditor();toast('已保存，生成通知时立即生效');
+}
+function clearNt(k){
+ if(DB.noticePhrases&&DB.noticePhrases[curNtTone])delete DB.noticePhrases[curNtTone][k];
+ save();renderNtEditor();toast('已恢复内置');
+}
+function resetNoticePhrases(){
+ if(!confirm('清除所有自定义通知话术，恢复为内置？'))return;
+ DB.noticePhrases={};save();renderNtEditor();toast('已恢复内置通知话术');
+}
+function exportPhrases(){
+ const data={type:'kg-phrase-pack',version:2,exported:new Date().toLocaleString('zh-CN',{hour12:false}),phrases:DB.phrases||{},noticePhrases:DB.noticePhrases||{}};
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='措辞包_'+today()+'.json';a.click();
+ toast('已导出措辞包');
+}
+function importPhrases(ev){
+ const file=ev.target.files[0];if(!file)return;
+ const rd=new FileReader();
+ rd.onload=()=>{try{
+   const data=JSON.parse(rd.result);
+   const src=data.phrases||data;
+   if(typeof src!=='object'){toast('格式不对');return;}
+   DB.phrases=DB.phrases||{};
+   Object.keys(src).forEach(f=>{DB.phrases[f]=Object.assign({},DB.phrases[f]||{},src[f]);});
+   if(data.noticePhrases&&typeof data.noticePhrases==='object'){
+    DB.noticePhrases=DB.noticePhrases||{};
+    Object.keys(data.noticePhrases).forEach(t=>{DB.noticePhrases[t]=Object.assign({},DB.noticePhrases[t]||{},data.noticePhrases[t]);});
+   }
+   save();renderPhrasePage();toast('措辞包已导入并合并');
+ }catch(e){toast('导入失败：文件不是有效 JSON');}};
+ rd.readAsText(file);ev.target.value='';
+}
+function resetPhrases(){
+ if(!confirm('清除所有自定义措辞，恢复为内置措辞？'))return;
+ DB.phrases={};save();renderPhrasePage();toast('已恢复内置措辞');
+}
+function fetchPhrases(){
+ const url=document.getElementById('phraseUrl').value.trim();
+ DB.phraseUrl=url;save();
+ if(!url){toast('请先填写措辞包地址');return;}
+ const st=document.getElementById('phraseUrlStatus');st.textContent='正在拉取…';
+ fetch(url).then(res=>{if(!res.ok)throw new Error('HTTP '+res.status);return res.json();}).then(data=>{
+  const src=data.phrases||data;
+  if(typeof src!=='object')throw new Error('内容不是措辞包');
+  DB.phrases=DB.phrases||{};
+  Object.keys(src).forEach(f=>{DB.phrases[f]=Object.assign({},DB.phrases[f]||{},src[f]);});
+  if(data.noticePhrases&&typeof data.noticePhrases==='object'){
+   DB.noticePhrases=DB.noticePhrases||{};
+   Object.keys(data.noticePhrases).forEach(t=>{DB.noticePhrases[t]=Object.assign({},DB.noticePhrases[t]||{},data.noticePhrases[t]);});
+  }
+  DB.phraseLastFetch=new Date().toLocaleString('zh-CN',{hour12:false});
+  save();renderPhrasePage();toast('联网更新成功');
+ }).catch(e=>{st.textContent='拉取失败：'+e.message+'（请检查地址是否可访问）';toast('拉取失败');});
+}
+
+renderRoster();
+/* PWA：注册离线缓存 */
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});}
+/* 首次访问：添加到主屏幕引导 */
+(function(){
+ try{
+  const inStandalone=window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches;
+  if(inStandalone||localStorage.getItem('kg_a2hs_tip'))return;
+  const isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const bar=document.createElement('div');
+  bar.style.cssText='position:fixed;left:10px;right:10px;bottom:'+(70)+'px;z-index:60;background:#1f2937;color:#fff;border-radius:12px;padding:11px 14px;font-size:12.5px;line-height:1.6;box-shadow:0 6px 20px rgba(0,0,0,.25);display:flex;gap:10px;align-items:flex-start';
+  bar.innerHTML='<div style="flex:1">📲 像 App 一样使用：'+(isIOS?'点底部「分享」→「添加到主屏幕」，桌面就有图标，全屏打开':'点右上角菜单 →「添加到主屏幕」，桌面就有图标，全屏打开')+'，断网也能用。</div><div style="cursor:pointer;font-weight:700;padding:0 4px" onclick="localStorage.setItem(\'kg_a2hs_tip\',\'1\');this.parentNode.remove()">✕</div>';
+  document.body.appendChild(bar);
+  setTimeout(()=>{if(bar.parentNode)bar.remove();},15000);
+ }catch(e){}
+})();
+</script>
+</body>
+</html>
+
+{
+  "name": "幼儿园日报助手",
+  "short_name": "日报助手",
+  "description": "幼儿园一日状态录入、日报/周报/通知生成，数据只存本机",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f6fa",
+  "theme_color": "#4f7cff",
+  "lang": "zh-CN",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
+
+/* 幼儿园日报助手 Service Worker：离线可用 */
+const CACHE = 'kg-daily-v3';
+const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
+
+self.addEventListener('install', (e) => {
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+});
+
+self.addEventListener('activate', (e) => {
+  e.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
+});
+
+self.addEventListener('fetch', (e) => {
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  // 只处理同源请求，避免拦截外部链接（如措辞包拉取）
+  if (url.origin !== self.location.origin) return;
+  e.respondWith(
+    fetch(req)
+      .then((res) => {
+        // 联网成功：更新缓存并返回最新内容（保证每次发布的新版本即时生效）
+        if (res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy));
+        }
+        return res;
+      })
+      .catch(() => caches.match(req).then((hit) => hit || caches.match('./index.html')))
+  );
+});
